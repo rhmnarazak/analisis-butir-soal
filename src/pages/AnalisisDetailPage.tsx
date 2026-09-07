@@ -28,6 +28,7 @@ import { getQuestionsForAssessment, getReliabilitasForAssessment } from "../data
 import { useHorizontalWheelScroll } from "../hooks/useHorizontalWheelScroll";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { getAnalisisRunInfo } from "../lib/analisisInfo";
+import { assetUrl } from "../lib/assetUrl";
 import { exportAnalisisToExcel } from "../lib/exportAnalisisExcel";
 import {
   buildAnalisisStats,
@@ -384,7 +385,7 @@ export function AnalisisDetailPage() {
               <>
                 <DistributionCard
                   title="Validitas"
-                  iconSrc="/images/icons/list-check.svg"
+                  iconSrc={assetUrl("/images/icons/list-check.svg")}
                   mainValue={`${Math.round(validPercent)}`}
                   mainSuffix="%"
                   pillLabel={isValid ? "Valid" : "Tidak Valid"}
@@ -415,7 +416,7 @@ export function AnalisisDetailPage() {
 
                 <DistributionCard
                   title="Rata-Rata Tingkat Kesukaran"
-                  iconSrc="/images/icons/trending-up.svg"
+                  iconSrc={assetUrl("/images/icons/trending-up.svg")}
                   mainValue={stats.avgKesukaran.toFixed(2).replace(".", ",")}
                   pillLabel={kesukaranTier}
                   pillClassName={kesukaranPill.className}
@@ -439,7 +440,7 @@ export function AnalisisDetailPage() {
 
                 <DistributionCard
                   title="Rata-Rata Daya Pembeda"
-                  iconSrc="/images/icons/layers-difference.svg"
+                  iconSrc={assetUrl("/images/icons/layers-difference.svg")}
                   mainValue={stats.avgDayaPembeda.toFixed(2).replace(".", ",")}
                   pillLabel={dayaPembedaTier}
                   pillClassName={dayaPembedaPill.className}
@@ -463,7 +464,7 @@ export function AnalisisDetailPage() {
 
                 <DistributionCard
                   title="Efektivitas Distraktor"
-                  iconSrc="/images/icons/equal-not.svg"
+                  iconSrc={assetUrl("/images/icons/equal-not.svg")}
                   mainValue={`${Math.round(efektifPercent)}`}
                   mainSuffix="%"
                   pillLabel={isEfektif ? "Efektif" : "Tidak Efektif"}

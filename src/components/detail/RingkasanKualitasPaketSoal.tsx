@@ -1,6 +1,7 @@
 import { AlertOctagon, CircleCheck, CircleX, Sparkles, TriangleAlert } from "lucide-react";
 import type { ReactNode } from "react";
 import { ChartCard, formatPercent, LegendRow, Pill, ThresholdBar } from "./ChartCardKit";
+import { assetUrl } from "../../lib/assetUrl";
 import {
   getAnalisisTier,
   getKualitasTone,
@@ -248,7 +249,7 @@ function RekomendasiCard({ stats }: { stats: AnalisisStats }) {
             className={`flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-5 text-sm font-semibold text-white ${tone.buttonBg}`}
           >
             Tinjau {perluPerhatian} Soal Yang Perlu Perhatian
-            <img src="/images/icons/circle-arrow-right-filled.svg" alt="" className="h-5 w-5" />
+            <img src={assetUrl("/images/icons/circle-arrow-right-filled.svg")} alt="" className="h-5 w-5" />
           </button>
         </div>
       )}
@@ -359,7 +360,7 @@ function CakupanAnalisisCard({ stats }: { stats: AnalisisStats }) {
   return (
     <ChartCard
       title="Cakupan Analisis"
-      icon={<img src="/images/icons/analyze.svg" alt="" className="h-6 w-6" />}
+      icon={<img src={assetUrl("/images/icons/analyze.svg")} alt="" className="h-6 w-6" />}
       iconBg="bg-primary-25"
       border="border-tertiary-100"
     >
@@ -431,7 +432,7 @@ function ReliabilitasTesCard({ stats }: { stats: AnalisisStats }) {
   return (
     <ChartCard
       title="Reliabilitas Tes"
-      icon={<img src="/images/icons/timeline.svg" alt="" className="h-6 w-6" />}
+      icon={<img src={assetUrl("/images/icons/timeline.svg")} alt="" className="h-6 w-6" />}
       iconBg="bg-primary-25"
       border="border-tertiary-100"
     >

@@ -1,4 +1,5 @@
 import { ChevronDown, HelpCircle } from "lucide-react";
+import { assetUrl } from "../../lib/assetUrl";
 
 const ACCOUNT_NAME = "Abdul Razak";
 
@@ -25,7 +26,7 @@ export function Navbar() {
 
         <button type="button" className="flex items-center gap-2 rounded">
           <img
-            src="/images/avatar-user.png"
+            src={assetUrl("/images/avatar-user.png")}
             alt={ACCOUNT_NAME}
             className="h-10 w-10 rounded-full object-cover"
           />

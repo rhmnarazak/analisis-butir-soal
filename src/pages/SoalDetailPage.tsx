@@ -17,6 +17,7 @@ import { ChartCard, LegendRow, Pill, StackedSegments, ThresholdBar } from "../co
 import { JENIS_STYLES, JenisPill } from "../components/detail/SoalTab";
 import { getQuestionsForAssessment } from "../data/questionAnalysis";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { assetUrl } from "../lib/assetUrl";
 import { getHasilAnalisis, R_TABEL, type HasilAnalisis } from "../lib/itemAnalysisStats";
 import { useAssessmentStore } from "../state/AssessmentStore";
 import type { AnswerOption, DifficultyLevel, DiscriminationLevel, QuestionAnalysis } from "../types/assessment";
@@ -474,7 +475,7 @@ export function SoalDetailPage() {
             {question.validitas && (
               <ChartCard
                 title="Validitas"
-                icon={<img src="/images/icons/list-check.svg" alt="" className="h-6 w-6" />}
+                icon={<img src={assetUrl("/images/icons/list-check.svg")} alt="" className="h-6 w-6" />}
                 iconBg="bg-primary-25"
                 border="border-tertiary-100"
                 tooltip
@@ -508,7 +509,7 @@ export function SoalDetailPage() {
             {question.tingkatKesukaran && (
               <ChartCard
                 title="Tingkat Kesukaran"
-                icon={<img src="/images/icons/trending-up.svg" alt="" className="h-6 w-6" />}
+                icon={<img src={assetUrl("/images/icons/trending-up.svg")} alt="" className="h-6 w-6" />}
                 iconBg="bg-primary-25"
                 border="border-tertiary-100"
                 tooltip
@@ -554,7 +555,7 @@ export function SoalDetailPage() {
             {question.dayaPembeda && (
               <ChartCard
                 title="Daya Pembeda"
-                icon={<img src="/images/icons/layers-difference.svg" alt="" className="h-6 w-6" />}
+                icon={<img src={assetUrl("/images/icons/layers-difference.svg")} alt="" className="h-6 w-6" />}
                 iconBg="bg-primary-25"
                 border="border-tertiary-100"
                 tooltip
@@ -599,7 +600,7 @@ export function SoalDetailPage() {
 
             <ChartCard
               title="Efektivitas Distraktor"
-              icon={<img src="/images/icons/equal-not.svg" alt="" className="h-6 w-6" />}
+              icon={<img src={assetUrl("/images/icons/equal-not.svg")} alt="" className="h-6 w-6" />}
               iconBg="bg-primary-25"
               border="border-tertiary-100"
               tooltip

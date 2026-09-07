@@ -1,6 +1,7 @@
 import { RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { assetUrl } from "../../lib/assetUrl";
 import { useAssessmentStore } from "../../state/AssessmentStore";
 import {
   AsesmenIcon,
@@ -52,7 +53,7 @@ export function Sidebar() {
 
       <div className="flex h-[60px] shrink-0 items-center justify-center">
         <img
-          src="/images/pijar-sekolah-logo.svg"
+          src={assetUrl("/images/pijar-sekolah-logo.svg")}
           alt="Pijar Sekolah"
           className="h-[87px] w-[87px] rounded-[20px]"
         />
