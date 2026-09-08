@@ -3,10 +3,11 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => ({
-  // Dev server stays at "/" so local URLs are unchanged; only the production
-  // build (deployed to GitHub Pages as a project site) needs the repo-name
-  // subpath prefix.
-  base: command === 'build' ? '/analisis-butir-soal/' : '/',
+export default defineConfig(() => ({
+  // Only the GitHub Pages project-site deploy needs a subpath prefix (set
+  // via VITE_BASE_PATH in .github/workflows/deploy-pages.yml) — dev server,
+  // local `npm run build`, and other hosts (e.g. Vercel, which serves from
+  // the domain root) all default to "/".
+  base: process.env.VITE_BASE_PATH || '/',
   plugins: [react(), tailwindcss()],
 }))
