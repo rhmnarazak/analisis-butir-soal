@@ -47,7 +47,7 @@ const HASIL_CELL_BG: Record<HasilAnalisis, string> = {
 // — so "why it's flagged" reads identically in both places.
 function MetricCell({ point, value }: { point: InterpretasiPoint; value: ReactNode | null }) {
   return (
-    <td className={`min-w-[260px] border-b border-l border-tertiary-300 px-4 py-3 align-top text-sm ${TONE_BG[point.severity]}`}>
+    <td className={`border-b border-l border-tertiary-300 px-3 py-3 align-top text-sm break-words ${TONE_BG[point.severity]}`}>
       <div className="flex flex-col gap-1">
         {value ?? <span className="text-tertiary-600">Tidak Dianalisis</span>}
         <p className={point.severity === "neutral" ? "text-tertiary-600" : "text-tertiary-900"}>{point.text}</p>
@@ -160,23 +160,23 @@ export function SoalPerluPerhatianPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-tertiary-300">
-            <table className="w-full border-separate border-spacing-0 text-left">
+          <div className="overflow-hidden rounded-xl border border-tertiary-300">
+            <table className="w-full table-fixed border-separate border-spacing-0 text-left">
               <colgroup>
-                <col style={{ width: 56, minWidth: 56 }} />
-                <col style={{ width: 223, minWidth: 223 }} />
-                <col style={{ minWidth: 260 }} />
-                <col style={{ minWidth: 260 }} />
-                <col style={{ minWidth: 260 }} />
-                <col style={{ minWidth: 260 }} />
-                <col style={{ minWidth: 260 }} />
+                <col style={{ width: "5%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "15%" }} />
+                <col style={{ width: "20%" }} />
               </colgroup>
               <thead>
                 <tr>
                   {["No", "Soal", "Validitas", "Tingkat Kesukaran", "Daya Pembeda", "Efektivitas Distraktor", "Hasil Analisis"].map((h, i) => (
                     <th
                       key={h}
-                      className={`whitespace-nowrap border-b border-tertiary-300 bg-tertiary-50 px-4 py-4 text-sm font-bold text-tertiary-900 ${
+                      className={`border-b border-tertiary-300 bg-tertiary-50 px-3 py-4 text-sm font-bold text-tertiary-900 ${
                         i > 1 ? "border-l" : ""
                       }`}
                     >
@@ -192,20 +192,20 @@ export function SoalPerluPerhatianPage() {
                   const distraktorPercent = getDistraktorPercent(q);
                   return (
                     <tr key={q.no} className="group cursor-pointer" onClick={() => goToSoal(q)}>
-                      <td className="border-b border-tertiary-300 bg-white px-4 py-3 align-top text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100">
+                      <td className="border-b border-tertiary-300 bg-white px-3 py-3 align-top text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100">
                         {q.no}
                       </td>
-                      <td className="border-b border-tertiary-300 bg-white px-4 py-3 align-top transition-colors group-hover:bg-tertiary-100">
+                      <td className="border-b border-tertiary-300 bg-white px-3 py-3 align-top break-words transition-colors group-hover:bg-tertiary-100">
                         <div className="flex flex-col gap-1">
                           <JenisPill jenis={q.jenis} />
-                          <span className="line-clamp-2 text-sm text-tertiary-900">{q.cuplikanSoal}</span>
+                          <span className="line-clamp-3 text-sm text-tertiary-900">{q.cuplikanSoal}</span>
                         </div>
                       </td>
                       <MetricCell
                         point={interpretasi.validitas}
                         value={
                           q.validitas && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-baseline gap-x-2">
                               <span className="font-bold text-tertiary-900">{q.validitas.value.toFixed(2).replace(".", ",")}</span>
                               <span
                                 className={`font-semibold ${
@@ -222,7 +222,7 @@ export function SoalPerluPerhatianPage() {
                         point={interpretasi.kesukaran}
                         value={
                           q.tingkatKesukaran && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-baseline gap-x-2">
                               <span className="font-bold text-tertiary-900">
                                 {q.tingkatKesukaran.value.toFixed(2).replace(".", ",")}
                               </span>
@@ -235,7 +235,7 @@ export function SoalPerluPerhatianPage() {
                         point={interpretasi.dayaPembeda}
                         value={
                           q.dayaPembeda && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-baseline gap-x-2">
                               <span className="font-bold text-tertiary-900">
                                 {q.dayaPembeda.value.toFixed(2).replace(".", ",")}
                               </span>
@@ -248,7 +248,7 @@ export function SoalPerluPerhatianPage() {
                         point={interpretasi.distraktor}
                         value={
                           distraktorStatus !== "Tidak Dianalisis" && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-baseline gap-x-2">
                               <span className="font-bold text-tertiary-900">
                                 {distraktorPercent?.toFixed(1).replace(".", ",")}%
                               </span>
@@ -263,7 +263,7 @@ export function SoalPerluPerhatianPage() {
                           )
                         }
                       />
-                      <td className={`min-w-[260px] border-b border-l border-tertiary-300 px-4 py-3 align-top text-sm ${HASIL_CELL_BG[hasil]}`}>
+                      <td className={`border-b border-l border-tertiary-300 px-3 py-3 align-top text-sm break-words ${HASIL_CELL_BG[hasil]}`}>
                         <div className="flex flex-col gap-1.5">
                           <StatusPill label={hasil} className={HASIL_STYLES[hasil].className} icon={HASIL_STYLES[hasil].icon} />
                           <p className="text-tertiary-900">{HASIL_BANNER[hasil].desc}</p>
