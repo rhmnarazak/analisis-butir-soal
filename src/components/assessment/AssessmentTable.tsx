@@ -91,7 +91,7 @@ function buildColumns({
       header: "Status",
       width: 172,
       render: (row) => (
-        <StatusBadge status={row.status} anbusoState={row.anbusoState} perluPublikasiUlang={row.perluPublikasiUlang} />
+        <StatusBadge status={row.status} perluPublikasiUlang={row.perluPublikasiUlang} />
       ),
     },
     {

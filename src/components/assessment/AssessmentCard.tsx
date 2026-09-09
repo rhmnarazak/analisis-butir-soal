@@ -33,7 +33,7 @@ export function AssessmentCard({ row, index }: { row: Assessment; index: number 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs text-tertiary-600">No. {index + 1}</span>
-          <StatusBadge status={row.status} anbusoState={row.anbusoState} perluPublikasiUlang={row.perluPublikasiUlang} />
+          <StatusBadge status={row.status} perluPublikasiUlang={row.perluPublikasiUlang} />
         </div>
         <h3 className="text-lg font-semibold text-tertiary-900">{row.namaUjian}</h3>
       </div>

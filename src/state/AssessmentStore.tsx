@@ -164,7 +164,11 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
       const isRepublish = assessment ? needsRepublish(assessment) : false;
       updateAssessment(id, {
         status: "Selesai",
-        anbusoState: "Analisis Sekarang",
+        // A fresh "Analisis Sekarang" gate only makes sense when AnBuSo
+        // hasn't already run and gone stale — publishing from "Publikasi
+        // Ulang" while it's "Perbarui Hasil Analisis" leaves that AnBuSo
+        // chip as-is; the stale analysis still needs its own re-run.
+        ...(assessment?.anbusoState !== "Perbarui Hasil Analisis" && { anbusoState: "Analisis Sekarang" }),
         nilaiDipublikasikanPada: formatAnalisisTimestamp(new Date()),
         nilaiDipublikasikanOleh: "Abdul Razak",
         perluPublikasiUlang: false,

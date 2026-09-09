@@ -24,11 +24,7 @@ export function SummaryCard({ assessment }: { assessment: Assessment }) {
           <h2 className="text-lg font-semibold text-tertiary-900">
             Ringkasan: {assessment.namaUjian}
           </h2>
-          <StatusBadge
-            status={assessment.status}
-            anbusoState={assessment.anbusoState}
-            perluPublikasiUlang={assessment.perluPublikasiUlang}
-          />
+          <StatusBadge status={assessment.status} perluPublikasiUlang={assessment.perluPublikasiUlang} />
         </div>
         <button
           type="button"

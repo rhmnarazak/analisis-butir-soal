@@ -129,6 +129,11 @@ export const assessments: Assessment[] = [
     pesertaDinilai: "30/30",
     nilaiRataRata: "80",
     anbusoState: "Perbarui Hasil Analisis",
+    // perluPublikasiUlang is the sole source of truth for the "Publikasi
+    // Ulang" status pill (see StatusBadge.tsx) — kept in sync with
+    // anbusoState here since this fixture represents a nilai edit made
+    // after AnBuSo already ran.
+    perluPublikasiUlang: true,
     kelas: "XI-A",
     jumlahPeserta: 30,
     durasi: "90 Menit",
@@ -341,6 +346,7 @@ export const assessments: Assessment[] = [
     pesertaDinilai: "30/30",
     nilaiRataRata: "88",
     anbusoState: "Perbarui Hasil Analisis",
+    perluPublikasiUlang: true,
     kelas: "XI-A",
     jumlahPeserta: 30,
     durasi: "90 Menit",

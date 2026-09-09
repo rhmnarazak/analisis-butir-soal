@@ -24,33 +24,25 @@ function Pill({ label, className }: { label: string; className: string }) {
 // A "Selesai" assessment whose nilai has been edited since it was last
 // published reads as "Publikasi Ulang" wherever its status shows up — the
 // assessment list (table/card) and the detail page's Ringkasan card alike
-// — instead of just repeating "Selesai". Two independent triggers:
-// - anbusoState "Perbarui Hasil Analisis": AnBuSo had already run and is
-//   now stale.
-// - perluPublikasiUlang: nilai was edited before AnBuSo ever ran (anbusoState
-//   still "Analisis Sekarang" or similar) — nothing analysis-wise to go
-//   stale, but the published nilai itself is. Set/cleared by
-//   AssessmentStore's updateNilaiPeserta()/publishNilai(); intentionally
-//   does NOT change anbusoState, so the AnBuSo tab chip stays as-is.
-export function needsRepublish(
-  assessment: Pick<Assessment, "status" | "anbusoState" | "perluPublikasiUlang">,
-): boolean {
-  return (
-    assessment.status === "Selesai" &&
-    (assessment.anbusoState === "Perbarui Hasil Analisis" || !!assessment.perluPublikasiUlang)
-  );
+// — instead of just repeating "Selesai". perluPublikasiUlang is the sole
+// source of truth for this: it's set/cleared by AssessmentStore's
+// updateNilaiPeserta()/publishNilai(), deliberately independent of
+// anbusoState — the AnBuSo tab chip can (and often does) disagree, e.g.
+// still "Perlu Diperbarui" right after a republish that hasn't re-run
+// AnBuSo yet, even though the assessment status itself is back to
+// "Selesai".
+export function needsRepublish(assessment: Pick<Assessment, "status" | "perluPublikasiUlang">): boolean {
+  return assessment.status === "Selesai" && !!assessment.perluPublikasiUlang;
 }
 
 export function StatusBadge({
   status,
-  anbusoState,
   perluPublikasiUlang,
 }: {
   status: Assessment["status"];
-  anbusoState: Assessment["anbusoState"];
   perluPublikasiUlang?: boolean;
 }) {
-  if (needsRepublish({ status, anbusoState, perluPublikasiUlang })) {
+  if (needsRepublish({ status, perluPublikasiUlang })) {
     return <Pill label="Publikasi Ulang" className="bg-secondary-50 border-secondary-200 text-warning-500" />;
   }
   return <Pill label={status} className={statusStyles[status]} />;
