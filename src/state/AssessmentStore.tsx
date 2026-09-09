@@ -164,11 +164,14 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
       const isRepublish = assessment ? needsRepublish(assessment) : false;
       updateAssessment(id, {
         status: "Selesai",
-        // A fresh "Analisis Sekarang" gate only makes sense when AnBuSo
-        // hasn't already run and gone stale — publishing from "Publikasi
-        // Ulang" while it's "Perbarui Hasil Analisis" leaves that AnBuSo
-        // chip as-is; the stale analysis still needs its own re-run.
-        ...(assessment?.anbusoState !== "Perbarui Hasil Analisis" && { anbusoState: "Analisis Sekarang" }),
+        // Only the very first publish (Siap Dipublikasi -> Selesai, where
+        // anbusoState is still "Menunggu Publikasi") actually opens the
+        // AnBuSo gate for the first time. Any other anbusoState — already
+        // run ("Lihat Hasil Analisis"), stale ("Perbarui Hasil Analisis"),
+        // or blocked ("Tidak Dapat Dianalisis") — is left exactly as-is:
+        // republishing nilai with nothing else changed shouldn't reset a
+        // completed (or blocked) analysis back to "ready to analyze".
+        ...(assessment?.anbusoState === "Menunggu Publikasi" && { anbusoState: "Analisis Sekarang" }),
         nilaiDipublikasikanPada: formatAnalisisTimestamp(new Date()),
         nilaiDipublikasikanOleh: "Abdul Razak",
         perluPublikasiUlang: false,
