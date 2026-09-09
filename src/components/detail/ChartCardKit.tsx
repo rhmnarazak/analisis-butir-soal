@@ -1,5 +1,6 @@
 import { Info } from "lucide-react";
 import type { ReactNode } from "react";
+import { InfoTooltip } from "../common/InfoTooltip";
 
 // Shared building blocks for the chart-style summary cards used across the
 // Analisis Butir Soal detail page (Ringkasan section + the Kualitas dan
@@ -137,7 +138,10 @@ export function ChartCard({
   icon?: ReactNode;
   iconBg?: string;
   border: string;
-  tooltip?: boolean;
+  // `true` renders a plain (non-interactive) info icon, matching every
+  // existing call site; a string upgrades it to a hover tooltip showing
+  // that text — see the 4 metric cards on SoalDetailPage.tsx.
+  tooltip?: boolean | string;
   children: ReactNode;
 }) {
   return (
@@ -145,7 +149,11 @@ export function ChartCard({
       <div className="flex items-center gap-2">
         {icon && <span className={`flex shrink-0 items-center justify-center rounded p-2 ${iconBg}`}>{icon}</span>}
         <span className="text-base font-semibold text-tertiary-900">{title}</span>
-        {tooltip && <Info size={16} className="text-tertiary-400" />}
+        {typeof tooltip === "string" ? (
+          <InfoTooltip text={tooltip} />
+        ) : (
+          tooltip && <Info size={16} className="text-tertiary-400" />
+        )}
       </div>
       {children}
     </div>

@@ -297,6 +297,7 @@ function KualitasPaketSoalCard({ stats }: { stats: AnalisisStats }) {
       icon={<KualitasPaketSoalIcon className={`h-6 w-6 ${tone.iconColor}`} />}
       iconBg={tone.iconBg}
       border={tone.cardBorder}
+      tooltip="Menunjukkan kualitas paket soal berdasarkan hasil analisis soal yang layak digunakan, perlu ditinjau, atau perlu diperbaiki."
     >
       <div className="flex items-center gap-2">
         <div className="flex items-end gap-1">
@@ -363,6 +364,7 @@ function CakupanAnalisisCard({ stats }: { stats: AnalisisStats }) {
       icon={<img src={assetUrl("/images/icons/analyze.svg")} alt="" className="h-6 w-6" />}
       iconBg="bg-primary-25"
       border="border-tertiary-100"
+      tooltip="Menunjukkan jumlah dan persentase soal yang sudah dianalisis dibandingkan dengan seluruh soal dalam asesmen."
     >
       <div className="flex flex-col items-center gap-1 py-2">
         <div
@@ -435,6 +437,7 @@ function ReliabilitasTesCard({ stats }: { stats: AnalisisStats }) {
       icon={<img src={assetUrl("/images/icons/timeline.svg")} alt="" className="h-6 w-6" />}
       iconBg="bg-primary-25"
       border="border-tertiary-100"
+      tooltip="Menunjukkan konsistensi antar soal dalam mengukur kemampuan peserta."
     >
       <div className="flex items-center gap-2">
         <span className="text-3xl font-bold text-tertiary-900">{stats.reliabilitas.toFixed(2).replace(".", ",")}</span>

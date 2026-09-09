@@ -143,6 +143,7 @@ const DAYA_PEMBEDA_BAR_COLOR: Record<DiscriminationLevel, string> = {
 function DistributionCard({
   title,
   iconSrc,
+  tooltip,
   mainValue,
   mainSuffix,
   pillLabel,
@@ -157,6 +158,7 @@ function DistributionCard({
 }: {
   title: string;
   iconSrc: string;
+  tooltip: string;
   mainValue: string;
   mainSuffix?: string;
   pillLabel: string;
@@ -177,7 +179,7 @@ function DistributionCard({
       icon={<img src={iconSrc} alt="" className="h-6 w-6" />}
       iconBg="bg-primary-25"
       border="border-tertiary-100"
-      tooltip
+      tooltip={tooltip}
     >
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
@@ -385,6 +387,7 @@ export function AnalisisDetailPage() {
               <>
                 <DistributionCard
                   title="Validitas"
+                  tooltip="Menunjukkan hubungan jawaban pada soal dengan hasil tes peserta secara keseluruhan pada semua soal yang dianalisis."
                   iconSrc={assetUrl("/images/icons/list-check.svg")}
                   mainValue={`${Math.round(validPercent)}`}
                   mainSuffix="%"
@@ -416,6 +419,7 @@ export function AnalisisDetailPage() {
 
                 <DistributionCard
                   title="Rata-Rata Tingkat Kesukaran"
+                  tooltip="Menunjukkan tingkat kesulitan soal berdasarkan jumlah peserta yang menjawab dengan benar pada semua soal yang dianalisis."
                   iconSrc={assetUrl("/images/icons/trending-up.svg")}
                   mainValue={stats.avgKesukaran.toFixed(2).replace(".", ",")}
                   pillLabel={kesukaranTier}
@@ -440,6 +444,7 @@ export function AnalisisDetailPage() {
 
                 <DistributionCard
                   title="Rata-Rata Daya Pembeda"
+                  tooltip="Menunjukkan kemampuan soal dalam membedakan peserta berdasarkan tingkat kemampuannya pada semua soal yang dianalisis."
                   iconSrc={assetUrl("/images/icons/layers-difference.svg")}
                   mainValue={stats.avgDayaPembeda.toFixed(2).replace(".", ",")}
                   pillLabel={dayaPembedaTier}
@@ -464,6 +469,7 @@ export function AnalisisDetailPage() {
 
                 <DistributionCard
                   title="Efektivitas Distraktor"
+                  tooltip="Menunjukkan efektivitas pilihan jawaban salah sebagai pengecoh pada semua soal yang dianalisis."
                   iconSrc={assetUrl("/images/icons/equal-not.svg")}
                   mainValue={`${Math.round(efektifPercent)}`}
                   mainSuffix="%"

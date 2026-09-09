@@ -1,8 +1,8 @@
-import { AlertTriangle, Check, Info, ListFilter, MoreVertical, Search, SquarePen } from "lucide-react";
+import { AlertTriangle, Check, ListFilter, MoreVertical, Search, SquarePen } from "lucide-react";
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { createPortal } from "react-dom";
 import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
 import { parsePesertaDinilai, statusFor } from "../../lib/participantStatus";
+import { InfoTooltip } from "../common/InfoTooltip";
 import type { Participant, QuestionTypeKey } from "../../types/assessment";
 
 function ProgressPill({ done, total }: { done: number; total: number }) {
@@ -41,44 +41,6 @@ function Checkbox({
     >
       {checked && <Check size={16} className="text-white" strokeWidth={3} />}
     </button>
-  );
-}
-
-// Hover tooltip for header info icons. Rendered through a portal (like
-// AksiMenu's dropdown) so it can't get clipped by the table's scroll
-// container, which computes overflow-y as auto once overflow-x is set.
-function InfoTooltip({ text }: { text: string }) {
-  const triggerRef = useRef<HTMLSpanElement>(null);
-  const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
-
-  function show() {
-    const rect = triggerRef.current?.getBoundingClientRect();
-    if (rect) setPos({ top: rect.bottom + 8, left: rect.left + rect.width / 2 });
-    setOpen(true);
-  }
-
-  return (
-    <>
-      <span
-        ref={triggerRef}
-        onMouseEnter={show}
-        onMouseLeave={() => setOpen(false)}
-        className="inline-flex cursor-help text-tertiary-400"
-      >
-        <Info size={14} />
-      </span>
-      {open &&
-        createPortal(
-          <div
-            style={{ position: "fixed", top: pos.top, left: pos.left, transform: "translateX(-50%)" }}
-            className="z-50 w-max max-w-[240px] rounded-lg bg-tertiary-900 px-3 py-2 text-xs font-normal leading-relaxed text-white shadow-lg"
-          >
-            {text}
-          </div>,
-          document.body,
-        )}
-    </>
   );
 }
 
@@ -379,7 +341,7 @@ export function PesertaTab({
                     ) : group.label === "Nilai" ? (
                       <span className="inline-flex items-center gap-1.5">
                         {group.label}
-                        <InfoTooltip text="Nilai Asli berlaku sebagai bawaan kecuali telah disesuaikan." />
+                        <InfoTooltip text="Nilai Asli berlaku sebagai bawaan kecuali telah disesuaikan." size={14} />
                       </span>
                     ) : (
                       group.label
@@ -403,7 +365,7 @@ export function PesertaTab({
                       {label === "Penyesuaian" ? (
                         <span className="inline-flex items-center gap-1.5">
                           {label}
-                          <InfoTooltip text="Nilai Penyesuaian merupakan hasil dari ubah Nilai Asli." />
+                          <InfoTooltip text="Nilai Penyesuaian merupakan hasil dari ubah Nilai Asli." size={14} />
                         </span>
                       ) : (
                         label

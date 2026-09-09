@@ -478,7 +478,7 @@ export function SoalDetailPage() {
                 icon={<img src={assetUrl("/images/icons/list-check.svg")} alt="" className="h-6 w-6" />}
                 iconBg="bg-primary-25"
                 border="border-tertiary-100"
-                tooltip
+                tooltip="Menunjukkan hubungan jawaban pada soal dengan hasil tes peserta secara keseluruhan."
               >
                 <div className="flex items-center gap-2">
                   <span className="text-3xl font-bold text-tertiary-900">{question.validitas.value.toFixed(2).replace(".", ",")}</span>
@@ -512,7 +512,7 @@ export function SoalDetailPage() {
                 icon={<img src={assetUrl("/images/icons/trending-up.svg")} alt="" className="h-6 w-6" />}
                 iconBg="bg-primary-25"
                 border="border-tertiary-100"
-                tooltip
+                tooltip="Menunjukkan tingkat kesulitan soal berdasarkan jumlah peserta yang menjawab dengan benar."
               >
                 {(() => {
                   const good = question.tingkatKesukaran.label === "Sedang";
@@ -558,7 +558,7 @@ export function SoalDetailPage() {
                 icon={<img src={assetUrl("/images/icons/layers-difference.svg")} alt="" className="h-6 w-6" />}
                 iconBg="bg-primary-25"
                 border="border-tertiary-100"
-                tooltip
+                tooltip="Menunjukkan kemampuan soal dalam membedakan peserta berdasarkan tingkat kemampuannya."
               >
                 {(() => {
                   const good = question.dayaPembeda.label === "Tinggi" || question.dayaPembeda.label === "Tinggi Sekali";
@@ -603,7 +603,7 @@ export function SoalDetailPage() {
               icon={<img src={assetUrl("/images/icons/equal-not.svg")} alt="" className="h-6 w-6" />}
               iconBg="bg-primary-25"
               border="border-tertiary-100"
-              tooltip
+              tooltip="Menunjukkan efektivitas pilihan jawaban salah sebagai pengecoh."
             >
               {question.distraktor ? (
                 (() => {
