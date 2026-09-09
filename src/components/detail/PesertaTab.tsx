@@ -160,21 +160,17 @@ function buildLeafColumns(
     {
       id: "nilai.penyesuaian",
       width: 110,
-      // "-" means this participant's Nilai Asli has never been adjusted;
-      // an ungraded participant can't have an adjustment either.
-      render: (p, index) =>
-        index < belumCount || p.nilaiPenyesuaian === 0
-          ? "-"
-          : p.nilaiPenyesuaian > 0
-            ? `+${p.nilaiPenyesuaian}`
-            : p.nilaiPenyesuaian,
+      // "-" means this participant's grade has never been manually
+      // adjusted; when set it's an absolute replacement score (0-100),
+      // not a delta, so it's shown as-is.
+      render: (p, index) => (index < belumCount || p.nilaiPenyesuaian === null ? "-" : p.nilaiPenyesuaian),
     },
     {
       id: "status",
       width: 150,
       sticky: "right",
       render: (p, index) => {
-        const status = nilaiStatusFor(index, belumCount, p.nilaiAsli, kkm);
+        const status = nilaiStatusFor(index, belumCount, p.nilaiAsli, p.nilaiPenyesuaian, kkm);
         return (
           <span
             className={`inline-flex items-center whitespace-nowrap rounded-[26px] border px-2.5 py-0.5 text-sm font-semibold ${status.className}`}

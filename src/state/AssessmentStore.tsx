@@ -103,8 +103,10 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
       const assessment = assessments.find((a) => a.id === id);
       if (!assessment) return;
       const roster = participants.slice(0, assessment.jumlahPeserta);
+      // Each participant's final grade is their Nilai Penyesuaian when set
+      // (an absolute override), else their Nilai Asli.
       const avg = roster.length
-        ? Math.round(roster.reduce((sum, p) => sum + p.nilaiPenyesuaian, 0) / roster.length)
+        ? Math.round(roster.reduce((sum, p) => sum + (p.nilaiPenyesuaian ?? p.nilaiAsli), 0) / roster.length)
         : undefined;
       updateAssessment(id, {
         status: "Siap Dipublikasi",

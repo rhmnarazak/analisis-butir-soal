@@ -64,7 +64,10 @@ const NAMES: { nama: string; kelas: string }[] = [
 
 const PARTIAL_SOAL_DINILAI_CYCLE = [3, 5, 7, 4, 8, 6];
 const CORRECTNESS_CYCLE = [0.8, 0.6, 1, 0.7, 0.9, 0.5, 0.8, 0.7, 0.6, 0.9];
-const PENYESUAIAN_CYCLE = [0, -2, 0, 3, 0, -4, 2, 0, 5, -1];
+// null = never manually adjusted; a set value is an absolute replacement
+// score (0-100), independent of nilaiAsli — mirrors a teacher overriding a
+// student's final grade after review (e.g. partial credit, appeal).
+const PENYESUAIAN_CYCLE: (number | null)[] = [null, 65, null, 82, null, 45, 90, null, 70, null];
 
 function buildParticipant(index: number, nama: string, kelas: string): Participant {
   const nomorPeserta = `${2024100231 + index}`;
@@ -98,7 +101,7 @@ function buildParticipant(index: number, nama: string, kelas: string): Participa
   }
 
   const nilaiAsli = totalBenar * 10;
-  const nilaiPenyesuaian = soalDinilai === TOTAL_SOAL ? PENYESUAIAN_CYCLE[index % PENYESUAIAN_CYCLE.length] : 0;
+  const nilaiPenyesuaian = soalDinilai === TOTAL_SOAL ? PENYESUAIAN_CYCLE[index % PENYESUAIAN_CYCLE.length] : null;
 
   return {
     id: `p${index + 1}`,

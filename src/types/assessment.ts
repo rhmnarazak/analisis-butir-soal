@@ -73,7 +73,10 @@ export interface Participant extends QuestionTypeScores {
   soalDinilai: number;
   totalSoal: number;
   nilaiAsli: number;
-  nilaiPenyesuaian: number;
+  // null = never manually adjusted (Penyesuaian column shows "-"); once
+  // set, it's an absolute replacement score (0-100), not a delta from
+  // nilaiAsli, and takes over as the value judged against ABN/kkm.
+  nilaiPenyesuaian: number | null;
 }
 
 export type DifficultyLevel = "Sangat Mudah" | "Mudah" | "Sedang" | "Sukar" | "Sangat Sukar";

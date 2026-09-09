@@ -15,18 +15,22 @@ export function statusFor(index: number, belumCount: number): { label: string; c
 }
 
 // Nilai-table status: an ungraded participant is always "Perlu Dinilai"
-// (Nilai Asli not yet available); once graded, Nilai Asli vs the
-// assessment's ABN (kkm) decides Remedial (below ABN) vs Lulus (at/above).
+// (Nilai Asli not yet available). Once graded, whichever score is the
+// participant's "final" one decides Remedial (below ABN) vs Lulus
+// (at/above) — Nilai Penyesuaian when it's been set (an absolute
+// replacement score), otherwise Nilai Asli.
 export function nilaiStatusFor(
   index: number,
   belumCount: number,
   nilaiAsli: number,
+  nilaiPenyesuaian: number | null,
   kkm: number,
 ): { label: string; className: string } {
   if (index < belumCount) {
     return { label: "Perlu Dinilai", className: "bg-secondary-50 border-secondary-200 text-warning-500" };
   }
-  if (nilaiAsli < kkm) {
+  const nilaiFinal = nilaiPenyesuaian ?? nilaiAsli;
+  if (nilaiFinal < kkm) {
     return { label: "Remedial", className: "bg-error-50 border-error-200 text-error-500" };
   }
   return { label: "Lulus", className: "bg-success-50 border-success-200 text-success-500" };
