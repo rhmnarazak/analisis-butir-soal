@@ -2,21 +2,19 @@ import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-// "Ubah Nilai" popup for a single participant. Nilai Penyesuaian is an
-// absolute replacement score (0-100, see src/lib/participantStatus.ts),
-// so this dialog just captures that one number — pre-filled with the
-// current override when re-editing, blank ("belum diisi") the first time.
+// "Ubah Nilai" popup for a single participant, per Figma node 6028-117646
+// (".ModalPengaturanBobotNilai"). Nilai Penyesuaian is an absolute
+// replacement score (0-100, see src/lib/participantStatus.ts) — pre-filled
+// with the current override when re-editing, blank the first time.
 export function UbahNilaiDialog({
   open,
   participantName,
-  nilaiAsli,
   currentNilaiPenyesuaian,
   onCancel,
   onSave,
 }: {
   open: boolean;
   participantName: string;
-  nilaiAsli: number;
   currentNilaiPenyesuaian: number | null;
   onCancel: () => void;
   onSave: (nilaiBaru: number) => void;
@@ -48,47 +46,48 @@ export function UbahNilaiDialog({
         aria-modal="true"
         aria-labelledby="ubah-nilai-title"
         onClick={(event) => event.stopPropagation()}
-        className="animate-fade-in flex w-[420px] max-w-full flex-col gap-5 rounded-[20px] bg-white p-6 shadow-[0px_0px_3px_0px_rgba(0,0,0,0.1),0px_4px_20px_0px_rgba(0,0,0,0.15)]"
+        className="animate-fade-in flex w-[480px] max-w-full flex-col rounded-[20px] bg-white shadow-[0px_0px_4px_0px_rgba(0,0,0,0.1),0px_8px_40px_0px_rgba(0,0,0,0.2)]"
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col gap-0.5">
-            <h2 id="ubah-nilai-title" className="text-lg font-semibold text-tertiary-900">
-              Ubah Nilai
+        <div className="flex flex-col gap-4 px-6 pt-6 pb-3">
+          <div className="flex items-center justify-between gap-2.5">
+            <h2 id="ubah-nilai-title" className="text-lg font-bold text-tertiary-900">
+              Ubah Nilai Aslis
             </h2>
-            <p className="text-sm text-tertiary-600">{participantName}</p>
+            <button
+              type="button"
+              onClick={onCancel}
+              aria-label="Tutup"
+              className="shrink-0 rounded-lg p-0.5 text-tertiary-500 transition-colors hover:bg-tertiary-100"
+            >
+              <X size={24} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onCancel}
-            aria-label="Tutup"
-            className="shrink-0 rounded-lg p-1 text-tertiary-500 transition-colors hover:bg-tertiary-100"
-          >
-            <X size={18} />
-          </button>
+          <p className="text-base text-tertiary-600">
+            <strong className="font-bold">{participantName}</strong> akan menerima penyesuaian nilai. Pastikan
+            sesuai kebijakan sekolah sebelum menyimpan.
+          </p>
         </div>
 
-        <div className="flex items-center justify-between rounded-lg border border-tertiary-200 bg-tertiary-25 px-4 py-3 text-sm">
-          <span className="text-tertiary-600">Nilai Asli</span>
-          <span className="font-semibold text-tertiary-900">{nilaiAsli}</span>
+        <div className="flex flex-col items-center gap-4 px-6 pt-3 pb-6">
+          <div className="flex w-full flex-col gap-2">
+            <label htmlFor="nilai-baru" className="text-sm font-semibold text-tertiary-900">
+              Penyesuaian Nilai
+            </label>
+            <div className="flex h-11 items-center gap-3 rounded-lg border border-tertiary-300 bg-white px-4">
+              <input
+                id="nilai-baru"
+                type="text"
+                inputMode="numeric"
+                placeholder="0"
+                value={value}
+                onChange={(event) => setValue(event.target.value.replace(/[^0-9]/g, "").slice(0, 3))}
+                className="w-full text-sm text-tertiary-900 placeholder:text-tertiary-500 focus:outline-none"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="nilai-baru" className="text-sm font-semibold text-tertiary-900">
-            Nilai Baru
-          </label>
-          <input
-            id="nilai-baru"
-            type="text"
-            inputMode="numeric"
-            placeholder="Masukkan nilai (0-100)"
-            value={value}
-            onChange={(event) => setValue(event.target.value.replace(/[^0-9]/g, "").slice(0, 3))}
-            className="h-11 rounded-lg border border-tertiary-300 bg-white px-4 text-sm font-semibold text-tertiary-900 focus:border-primary-500 focus:outline-none"
-          />
-          {value !== "" && !isValid && <span className="text-xs text-error-500">Nilai harus di antara 0-100.</span>}
-        </div>
-
-        <div className="flex gap-3">
+        <div className="flex items-center justify-center gap-4 border-t border-tertiary-200 p-6">
           <button
             type="button"
             onClick={onCancel}
@@ -100,7 +99,7 @@ export function UbahNilaiDialog({
             type="button"
             disabled={!isValid}
             onClick={() => onSave(numeric)}
-            className="flex h-11 flex-1 items-center justify-center whitespace-nowrap rounded-lg bg-primary-500 px-5 text-sm font-semibold text-white transition-colors hover:bg-primary-400 disabled:cursor-not-allowed disabled:bg-tertiary-300"
+            className="flex h-11 flex-1 items-center justify-center whitespace-nowrap rounded-lg bg-primary-500 px-5 text-sm font-semibold text-white transition-colors hover:bg-primary-400 disabled:cursor-not-allowed disabled:bg-tertiary-300 disabled:text-tertiary-500"
           >
             Simpan
           </button>

@@ -472,7 +472,6 @@ export function PesertaTab({
       <UbahNilaiDialog
         open={editingParticipant !== null}
         participantName={editingParticipant?.nama ?? ""}
-        nilaiAsli={editingParticipant?.nilaiAsli ?? 0}
         currentNilaiPenyesuaian={editingParticipant?.nilaiPenyesuaian ?? null}
         onCancel={() => setEditingParticipant(null)}
         onSave={(nilaiBaru) => {
