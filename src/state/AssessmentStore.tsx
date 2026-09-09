@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { needsRepublish } from "../components/assessment/StatusBadge";
 import { assessments as seedAssessments } from "../data/assessments";
 import { participants } from "../data/participants";
 import { formatAnalisisTimestamp } from "../lib/analisisInfo";
@@ -14,7 +15,8 @@ const RESET_SNACKBAR_MS = 3000;
 export type SnackbarState =
   | { kind: "pending" | "success-run" | "success-update"; assessmentId: string }
   | { kind: "reset" }
-  | { kind: "nilai-updated"; participantName: string };
+  | { kind: "nilai-updated"; participantName: string }
+  | { kind: "publish-success" | "publish-update-success" };
 
 // assessmentId -> participantId -> Nilai Penyesuaian (absolute 0-100 score).
 // Kept separate from `participants` (a shared read-only roster reused
@@ -155,6 +157,11 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
 
   const publishNilai = useCallback(
     (id: string) => {
+      // Read BEFORE the update: whether this was a first-time publish or a
+      // republish decides which of the two "Berhasil Publikasi..." snackbar
+      // variants (and popup copy, chosen by the caller) applies.
+      const assessment = assessments.find((a) => a.id === id);
+      const isRepublish = assessment ? needsRepublish(assessment) : false;
       updateAssessment(id, {
         status: "Selesai",
         anbusoState: "Analisis Sekarang",
@@ -162,8 +169,12 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
         nilaiDipublikasikanOleh: "Abdul Razak",
         perluPublikasiUlang: false,
       });
+      showSnackbar(
+        { kind: isRepublish ? "publish-update-success" : "publish-success" },
+        SUCCESS_SNACKBAR_MS,
+      );
     },
-    [updateAssessment],
+    [assessments, showSnackbar, updateAssessment],
   );
 
   const runAnalysis = useCallback(

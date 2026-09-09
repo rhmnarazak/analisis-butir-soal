@@ -8,12 +8,14 @@ import { AnbusoGate } from "../components/detail/AnbusoGate";
 import { DetailTabBar, type DetailTab } from "../components/detail/DetailTabBar";
 import { OfflinePesertaCard } from "../components/detail/OfflinePesertaCard";
 import { PesertaTab } from "../components/detail/PesertaTab";
+import { PublikasiNilaiDialog } from "../components/detail/PublikasiNilaiDialog";
 import { SoalTab } from "../components/detail/SoalTab";
 import { SummaryCard } from "../components/detail/SummaryCard";
 import { participants } from "../data/participants";
 import { getQuestionsForAssessment } from "../data/questionAnalysis";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { getPublikasiInfo } from "../lib/analisisInfo";
+import { getNilaiExtremes, parsePesertaDinilai } from "../lib/participantStatus";
 import { countAnalyzableSoal } from "../lib/soalAnalysis";
 import { useAssessmentStore } from "../state/AssessmentStore";
 
@@ -26,7 +28,8 @@ export function AssessmentDetailPage() {
     searchParams.get("tab") === "anbuso" ? "Analisis Butir Soal" : "Peserta",
   );
   const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
-  const { getAssessment, completeAllPeserta, publishNilai, runAnalysis, isAnalysisPending } = useAssessmentStore();
+  const { getAssessment, completeAllPeserta, publishNilai, runAnalysis, isAnalysisPending, nilaiOverrides } =
+    useAssessmentStore();
 
   const assessment = getAssessment(id ?? "");
   usePageTitle(assessment ? assessment.namaUjian : "Detail Nilai Asesmen");
@@ -42,6 +45,19 @@ export function AssessmentDetailPage() {
   // Nilai already published, but a subsequent edit means the AnBuSo analysis
   // is now stale — re-publishing here is what unblocks re-running it.
   const isRepublishState = needsRepublish(assessment);
+
+  // Same per-assessment Nilai Penyesuaian overrides PesertaTab applies, so
+  // the Publikasi Nilai popup's Nilai Tertinggi/Terendah reflect any Ubah
+  // Nilai edits made before publishing.
+  const overridesForAssessment = nilaiOverrides[assessment.id];
+  const effectiveParticipants = overridesForAssessment
+    ? visibleParticipants.map((p) =>
+        p.id in overridesForAssessment ? { ...p, nilaiPenyesuaian: overridesForAssessment[p.id] } : p,
+      )
+    : visibleParticipants;
+  const { dinilai, total } = parsePesertaDinilai(assessment.pesertaDinilai);
+  const belumCount = Math.min(Math.max(0, total - dinilai), effectiveParticipants.length);
+  const { tertinggi: nilaiTertinggi, terendah: nilaiTerendah } = getNilaiExtremes(effectiveParticipants, belumCount);
 
   return (
     <>
@@ -121,10 +137,12 @@ export function AssessmentDetailPage() {
           setPendingConfirm(null);
         }}
       />
-      <ConfirmDialog
+      <PublikasiNilaiDialog
         open={pendingConfirm === "publish"}
-        title="Publikasikan Nilai"
-        message="Apakah Anda yakin ingin publikasikan nilai ke peserta?"
+        isRepublish={isRepublishState}
+        assessment={assessment}
+        nilaiTertinggi={nilaiTertinggi}
+        nilaiTerendah={nilaiTerendah}
         onCancel={() => setPendingConfirm(null)}
         onConfirm={() => {
           publishNilai(assessment.id);
