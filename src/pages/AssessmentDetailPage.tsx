@@ -74,8 +74,9 @@ export function AssessmentDetailPage() {
         </div>
         <button
           type="button"
+          disabled={assessment.status === "Perlu Dinilai"}
           onClick={() => setPendingConfirm("publish")}
-          className="flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-400"
+          className="flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-400 disabled:cursor-not-allowed disabled:bg-tertiary-300 disabled:text-tertiary-500"
         >
           <Send size={16} />
           {isRepublishState ? "Publikasi Perubahan Nilai" : "Publikasikan Nilai"}
