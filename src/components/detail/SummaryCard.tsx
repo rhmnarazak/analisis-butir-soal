@@ -17,11 +17,6 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export function SummaryCard({ assessment }: { assessment: Assessment }) {
-  // Nilai already published once, but a later edit made the AnBuSo analysis
-  // stale — the status pill flags that a re-publish is what's needed next,
-  // instead of just repeating the already-published "Selesai" state.
-  const needsRepublish = assessment.status === "Selesai" && assessment.anbusoState === "Perbarui Hasil Analisis";
-
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-tertiary-300 bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -29,13 +24,7 @@ export function SummaryCard({ assessment }: { assessment: Assessment }) {
           <h2 className="text-lg font-semibold text-tertiary-900">
             Ringkasan: {assessment.namaUjian}
           </h2>
-          {needsRepublish ? (
-            <span className="inline-flex items-center whitespace-nowrap rounded-[26px] border border-secondary-200 bg-secondary-50 px-2.5 py-0.5 text-sm font-semibold text-warning-500">
-              Publikasi Ulang
-            </span>
-          ) : (
-            <StatusBadge status={assessment.status} />
-          )}
+          <StatusBadge status={assessment.status} anbusoState={assessment.anbusoState} />
         </div>
         <button
           type="button"

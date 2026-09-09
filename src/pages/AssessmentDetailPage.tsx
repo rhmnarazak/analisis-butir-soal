@@ -2,6 +2,7 @@ import { Send } from "lucide-react";
 import { useState } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { Breadcrumbs } from "../components/assessment/Breadcrumbs";
+import { needsRepublish } from "../components/assessment/StatusBadge";
 import { ConfirmDialog } from "../components/common/ConfirmDialog";
 import { AnbusoGate } from "../components/detail/AnbusoGate";
 import { DetailTabBar, type DetailTab } from "../components/detail/DetailTabBar";
@@ -40,7 +41,7 @@ export function AssessmentDetailPage() {
   const questionAnalysis = getQuestionsForAssessment(assessment.id);
   // Nilai already published, but a subsequent edit means the AnBuSo analysis
   // is now stale — re-publishing here is what unblocks re-running it.
-  const needsRepublish = assessment.status === "Selesai" && assessment.anbusoState === "Perbarui Hasil Analisis";
+  const isRepublishState = needsRepublish(assessment);
 
   return (
     <>
@@ -61,7 +62,7 @@ export function AssessmentDetailPage() {
           className="flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-400"
         >
           <Send size={16} />
-          {needsRepublish ? "Publikasi Perubahan Nilai" : "Publikasikan Nilai"}
+          {isRepublishState ? "Publikasi Perubahan Nilai" : "Publikasikan Nilai"}
         </button>
       </div>
 
@@ -89,7 +90,7 @@ export function AssessmentDetailPage() {
               kkm={assessment.kkm}
               pesertaDinilai={assessment.pesertaDinilai}
               status={assessment.status}
-              needsRepublish={needsRepublish}
+              needsRepublish={isRepublishState}
               publikasiInfo={getPublikasiInfo(assessment)}
               onRowClick={
                 assessment.status === "Perlu Dinilai" ? () => setPendingConfirm("completePeserta") : undefined

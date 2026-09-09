@@ -21,7 +21,24 @@ function Pill({ label, className }: { label: string; className: string }) {
   );
 }
 
-export function StatusBadge({ status }: { status: Assessment["status"] }) {
+// A "Selesai" assessment whose AnBuSo analysis has gone stale (nilai edited
+// after the last analysis run) reads as "Publikasi Ulang" wherever its
+// status shows up — the assessment list (table/card) and the detail page's
+// Ringkasan card alike — instead of just repeating "Selesai".
+export function needsRepublish(assessment: Pick<Assessment, "status" | "anbusoState">): boolean {
+  return assessment.status === "Selesai" && assessment.anbusoState === "Perbarui Hasil Analisis";
+}
+
+export function StatusBadge({
+  status,
+  anbusoState,
+}: {
+  status: Assessment["status"];
+  anbusoState: Assessment["anbusoState"];
+}) {
+  if (needsRepublish({ status, anbusoState })) {
+    return <Pill label="Publikasi Ulang" className="bg-secondary-50 border-secondary-200 text-warning-500" />;
+  }
   return <Pill label={status} className={statusStyles[status]} />;
 }
 
