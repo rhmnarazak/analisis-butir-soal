@@ -1,4 +1,4 @@
-import { AlertTriangle, Check, CircleCheck, Info, ListFilter, Search, Sparkles, SquarePen } from "lucide-react";
+import { AlertTriangle, Check, CircleCheck, Info, ListFilter, Search, SquarePen } from "lucide-react";
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
 import { nilaiStatusFor, parsePesertaDinilai } from "../../lib/participantStatus";
@@ -328,12 +328,13 @@ export function PesertaTab({
       {status === "Selesai" && needsRepublish && (
         <div className="flex items-start gap-3 rounded-lg border border-warning-500 border-l-4 bg-warning-25 p-4">
           <span className="flex shrink-0 items-center justify-center rounded-full bg-warning-500 p-1">
-            <Sparkles size={14} className="text-white" />
+            <Info size={14} className="text-white" />
           </span>
           <p className="text-sm text-tertiary-900">
-            <strong>Hasil Analisis Perlu Diperbarui</strong>
+            Terdapat perubahan nilai setelah publikasi terakhir. Publikasikan perubahan agar peserta melihat nilai
+            terbaru.
             <br />
-            Perubahan nilai pada peserta menyebabkan hasil analisis perlu diperbarui.
+            Publikasi terakhir: <strong>{publikasiInfo.tanggal}</strong> oleh <strong>{publikasiInfo.oleh}</strong>
           </p>
         </div>
       )}
