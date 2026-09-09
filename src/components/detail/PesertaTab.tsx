@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
-import { parsePesertaDinilai, statusFor } from "../../lib/participantStatus";
+import { nilaiStatusFor, parsePesertaDinilai } from "../../lib/participantStatus";
 import { InfoTooltip } from "../common/InfoTooltip";
 import type { AssessmentStatus, Participant, QuestionTypeKey } from "../../types/assessment";
 
@@ -117,6 +117,7 @@ function buildLeafColumns(
   selected: Set<string>,
   toggleOne: (id: string) => void,
   belumCount: number,
+  kkm: number,
 ): LeafColumn[] {
   return [
     {
@@ -151,14 +152,29 @@ function buildLeafColumns(
         render: (p: Participant) => p[group.key][sub.key],
       })),
     ),
-    { id: "nilai.asli", width: 90, render: (p) => p.nilaiAsli },
-    { id: "nilai.penyesuaian", width: 110, render: (p) => (p.nilaiPenyesuaian >= 0 ? `+${p.nilaiPenyesuaian}` : p.nilaiPenyesuaian) },
+    {
+      id: "nilai.asli",
+      width: 90,
+      render: (p, index) => (index < belumCount ? "-" : p.nilaiAsli),
+    },
+    {
+      id: "nilai.penyesuaian",
+      width: 110,
+      // "-" means this participant's Nilai Asli has never been adjusted;
+      // an ungraded participant can't have an adjustment either.
+      render: (p, index) =>
+        index < belumCount || p.nilaiPenyesuaian === 0
+          ? "-"
+          : p.nilaiPenyesuaian > 0
+            ? `+${p.nilaiPenyesuaian}`
+            : p.nilaiPenyesuaian,
+    },
     {
       id: "status",
       width: 150,
       sticky: "right",
-      render: (_p, index) => {
-        const status = statusFor(index, belumCount);
+      render: (p, index) => {
+        const status = nilaiStatusFor(index, belumCount, p.nilaiAsli, kkm);
         return (
           <span
             className={`inline-flex items-center whitespace-nowrap rounded-[26px] border px-2.5 py-0.5 text-sm font-semibold ${status.className}`}
@@ -234,7 +250,7 @@ export function PesertaTab({
     });
   };
 
-  const leafColumns = buildLeafColumns(selected, toggleOne, belumCount);
+  const leafColumns = buildLeafColumns(selected, toggleOne, belumCount, kkm);
 
   const rightOffsets = new Map<string, number>();
   {
