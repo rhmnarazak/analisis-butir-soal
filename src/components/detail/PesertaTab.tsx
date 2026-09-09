@@ -1,4 +1,14 @@
-import { AlertTriangle, Check, CircleCheck, Info, ListFilter, MoreVertical, Search, SquarePen } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  CircleCheck,
+  Info,
+  ListFilter,
+  MoreVertical,
+  Search,
+  Sparkles,
+  SquarePen,
+} from "lucide-react";
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
 import { parsePesertaDinilai, statusFor } from "../../lib/participantStatus";
@@ -187,6 +197,7 @@ export function PesertaTab({
   kkm,
   pesertaDinilai,
   status,
+  needsRepublish,
   publikasiInfo,
   onRowClick,
 }: {
@@ -194,6 +205,10 @@ export function PesertaTab({
   kkm: number;
   pesertaDinilai: string;
   status: AssessmentStatus;
+  // Nilai already published once, but a later edit means it (and the AnBuSo
+  // analysis) is now stale — swaps the "Selesai" success banner for a
+  // warning one prompting re-publication.
+  needsRepublish: boolean;
   publikasiInfo: { tanggal: string; oleh: string };
   // Set only while the assessment is still "Perlu Dinilai" — clicking any
   // row then opens the "skip grading, mark everyone Selesai" confirmation.
@@ -295,7 +310,20 @@ export function PesertaTab({
         </div>
       )}
 
-      {status === "Selesai" && (
+      {status === "Selesai" && needsRepublish && (
+        <div className="flex items-start gap-3 rounded-lg border border-warning-500 border-l-4 bg-warning-25 p-4">
+          <span className="flex shrink-0 items-center justify-center rounded-full bg-warning-500 p-1">
+            <Sparkles size={14} className="text-white" />
+          </span>
+          <p className="text-sm text-tertiary-900">
+            <strong>Hasil Analisis Perlu Diperbarui</strong>
+            <br />
+            Perubahan nilai pada peserta menyebabkan hasil analisis perlu diperbarui.
+          </p>
+        </div>
+      )}
+
+      {status === "Selesai" && !needsRepublish && (
         <div className="flex items-start gap-3 rounded-lg border border-success-500 border-l-4 bg-success-25 p-4">
           <span className="flex shrink-0 items-center justify-center rounded-full bg-success-500 p-1">
             <CircleCheck size={14} className="text-white" />

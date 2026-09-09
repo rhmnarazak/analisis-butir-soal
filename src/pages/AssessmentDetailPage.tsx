@@ -38,7 +38,9 @@ export function AssessmentDetailPage() {
   // (e.g. a small make-up exam) show just the first `jumlahPeserta` of them.
   const visibleParticipants = participants.slice(0, assessment.jumlahPeserta);
   const questionAnalysis = getQuestionsForAssessment(assessment.id);
-  const canPublish = assessment.status === "Siap Dipublikasi";
+  // Nilai already published, but a subsequent edit means the AnBuSo analysis
+  // is now stale — re-publishing here is what unblocks re-running it.
+  const needsRepublish = assessment.status === "Selesai" && assessment.anbusoState === "Perbarui Hasil Analisis";
 
   return (
     <>
@@ -55,14 +57,11 @@ export function AssessmentDetailPage() {
         </div>
         <button
           type="button"
-          disabled={!canPublish}
-          onClick={canPublish ? () => setPendingConfirm("publish") : undefined}
-          className={`flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-4 text-sm font-semibold transition-colors ${
-            !canPublish ? "bg-tertiary-300 text-tertiary-500" : "bg-primary-500 text-white hover:bg-primary-400"
-          }`}
+          onClick={() => setPendingConfirm("publish")}
+          className="flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-primary-400"
         >
           <Send size={16} />
-          Publikasikan Nilai
+          {needsRepublish ? "Publikasi Perubahan Nilai" : "Publikasikan Nilai"}
         </button>
       </div>
 
@@ -90,6 +89,7 @@ export function AssessmentDetailPage() {
               kkm={assessment.kkm}
               pesertaDinilai={assessment.pesertaDinilai}
               status={assessment.status}
+              needsRepublish={needsRepublish}
               publikasiInfo={getPublikasiInfo(assessment)}
               onRowClick={
                 assessment.status === "Perlu Dinilai" ? () => setPendingConfirm("completePeserta") : undefined
