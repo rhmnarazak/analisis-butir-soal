@@ -41,6 +41,13 @@ export interface Assessment {
   // published at least once (shown on the Peserta tab's "Selesai" banner).
   nilaiDipublikasikanPada?: string;
   nilaiDipublikasikanOleh?: string;
+  // Set by AssessmentStore.updateNilaiPeserta() when a participant's nilai
+  // is edited on an already-"Selesai" assessment — independent of
+  // anbusoState, since editing nilai before AnBuSo has ever run
+  // (anbusoState still "Analisis Sekarang") still means the published
+  // nilai is stale even though there's no analysis result to go stale.
+  // Cleared by publishNilai(). Drives needsRepublish() in StatusBadge.tsx.
+  perluPublikasiUlang?: boolean;
 }
 
 export interface QuestionTypeScore {

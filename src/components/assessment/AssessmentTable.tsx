@@ -87,7 +87,13 @@ function buildColumns({
     { header: "Peserta Dinilai", width: 142, render: (row) => row.pesertaDinilai },
     { header: "Nilai Rata-Rata", width: 150, render: (row) => row.nilaiRataRata },
     { header: "Metode", width: 110, render: (row) => <MetodeBadge metode={row.metode} /> },
-    { header: "Status", width: 172, render: (row) => <StatusBadge status={row.status} anbusoState={row.anbusoState} /> },
+    {
+      header: "Status",
+      width: 172,
+      render: (row) => (
+        <StatusBadge status={row.status} anbusoState={row.anbusoState} perluPublikasiUlang={row.perluPublikasiUlang} />
+      ),
+    },
     {
       header: "Analisis Butir Soal",
       width: 212,

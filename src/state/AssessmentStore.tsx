@@ -77,8 +77,10 @@ interface AssessmentStoreValue {
   /** assessmentId -> participantId -> Nilai Penyesuaian override, see NilaiOverrides above. */
   nilaiOverrides: NilaiOverrides;
   /** Ubah Nilai flow: sets a participant's Nilai Penyesuaian for this assessment; if the
-   * assessment is already "Selesai", flips its AnBuSo state to "Perbarui Hasil Analisis"
-   * (surfaces as the "Publikasi Ulang" status everywhere via needsRepublish()). */
+   * assessment is already "Selesai", marks it perluPublikasiUlang (surfaces as "Publikasi
+   * Ulang" everywhere via needsRepublish()), and additionally flips its AnBuSo state to
+   * "Perbarui Hasil Analisis" only if AnBuSo had already run ("Lihat Hasil Analisis") —
+   * otherwise the AnBuSo tab is left as-is. */
   updateNilaiPeserta: (assessmentId: string, participantId: string, nilaiBaru: number, participantName: string) => void;
 }
 
@@ -158,6 +160,7 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
         anbusoState: "Analisis Sekarang",
         nilaiDipublikasikanPada: formatAnalisisTimestamp(new Date()),
         nilaiDipublikasikanOleh: "Abdul Razak",
+        perluPublikasiUlang: false,
       });
     },
     [updateAssessment],
@@ -201,7 +204,15 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
       }));
       const assessment = assessments.find((a) => a.id === assessmentId);
       if (assessment?.status === "Selesai") {
-        updateAssessment(assessmentId, { anbusoState: "Perbarui Hasil Analisis" });
+        // Only an already-run analysis can go stale — if AnBuSo hasn't run
+        // yet (still "Analisis Sekarang"/"Tidak Dapat Dianalisis"/etc.),
+        // there's nothing there to invalidate, so leave the AnBuSo tab
+        // alone. The "Publikasi Ulang" status itself still applies either
+        // way, via perluPublikasiUlang below.
+        updateAssessment(assessmentId, {
+          ...(assessment.anbusoState === "Lihat Hasil Analisis" && { anbusoState: "Perbarui Hasil Analisis" }),
+          perluPublikasiUlang: true,
+        });
       }
       showSnackbar({ kind: "nilai-updated", participantName }, SUCCESS_SNACKBAR_MS);
     },

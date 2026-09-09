@@ -21,22 +21,36 @@ function Pill({ label, className }: { label: string; className: string }) {
   );
 }
 
-// A "Selesai" assessment whose AnBuSo analysis has gone stale (nilai edited
-// after the last analysis run) reads as "Publikasi Ulang" wherever its
-// status shows up — the assessment list (table/card) and the detail page's
-// Ringkasan card alike — instead of just repeating "Selesai".
-export function needsRepublish(assessment: Pick<Assessment, "status" | "anbusoState">): boolean {
-  return assessment.status === "Selesai" && assessment.anbusoState === "Perbarui Hasil Analisis";
+// A "Selesai" assessment whose nilai has been edited since it was last
+// published reads as "Publikasi Ulang" wherever its status shows up — the
+// assessment list (table/card) and the detail page's Ringkasan card alike
+// — instead of just repeating "Selesai". Two independent triggers:
+// - anbusoState "Perbarui Hasil Analisis": AnBuSo had already run and is
+//   now stale.
+// - perluPublikasiUlang: nilai was edited before AnBuSo ever ran (anbusoState
+//   still "Analisis Sekarang" or similar) — nothing analysis-wise to go
+//   stale, but the published nilai itself is. Set/cleared by
+//   AssessmentStore's updateNilaiPeserta()/publishNilai(); intentionally
+//   does NOT change anbusoState, so the AnBuSo tab chip stays as-is.
+export function needsRepublish(
+  assessment: Pick<Assessment, "status" | "anbusoState" | "perluPublikasiUlang">,
+): boolean {
+  return (
+    assessment.status === "Selesai" &&
+    (assessment.anbusoState === "Perbarui Hasil Analisis" || !!assessment.perluPublikasiUlang)
+  );
 }
 
 export function StatusBadge({
   status,
   anbusoState,
+  perluPublikasiUlang,
 }: {
   status: Assessment["status"];
   anbusoState: Assessment["anbusoState"];
+  perluPublikasiUlang?: boolean;
 }) {
-  if (needsRepublish({ status, anbusoState })) {
+  if (needsRepublish({ status, anbusoState, perluPublikasiUlang })) {
     return <Pill label="Publikasi Ulang" className="bg-secondary-50 border-secondary-200 text-warning-500" />;
   }
   return <Pill label={status} className={statusStyles[status]} />;
