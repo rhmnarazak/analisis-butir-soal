@@ -1,7 +1,7 @@
 import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ListFilter, Search, XCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { HASIL_STYLES, StatusPill } from "../components/detail/AnalisisSoalTable";
+import { DAYA_PEMBEDA_STYLES, HASIL_STYLES, KESUKARAN_STYLES, StatusPill } from "../components/detail/AnalisisSoalTable";
 import { JenisPill } from "../components/detail/SoalTab";
 import { getQuestionsForAssessment } from "../data/questionAnalysis";
 import { usePageTitle } from "../hooks/usePageTitle";
@@ -226,7 +226,9 @@ export function SoalPerluPerhatianPage() {
                               <span className="font-bold text-tertiary-900">
                                 {q.tingkatKesukaran.value.toFixed(2).replace(".", ",")}
                               </span>
-                              <span className="font-semibold text-tertiary-900">{q.tingkatKesukaran.label}</span>
+                              <span className={`font-semibold ${KESUKARAN_STYLES[q.tingkatKesukaran.label].textClass}`}>
+                                {q.tingkatKesukaran.label}
+                              </span>
                             </div>
                           )
                         }
@@ -239,7 +241,9 @@ export function SoalPerluPerhatianPage() {
                               <span className="font-bold text-tertiary-900">
                                 {q.dayaPembeda.value.toFixed(2).replace(".", ",")}
                               </span>
-                              <span className="font-semibold text-tertiary-900">{q.dayaPembeda.label}</span>
+                              <span className={`font-semibold ${DAYA_PEMBEDA_STYLES[q.dayaPembeda.label].textClass}`}>
+                                {q.dayaPembeda.label}
+                              </span>
                             </div>
                           )
                         }
