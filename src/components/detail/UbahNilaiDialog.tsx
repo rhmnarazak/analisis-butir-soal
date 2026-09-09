@@ -51,7 +51,7 @@ export function UbahNilaiDialog({
         <div className="flex flex-col gap-4 px-6 pt-6 pb-3">
           <div className="flex items-center justify-between gap-2.5">
             <h2 id="ubah-nilai-title" className="text-lg font-bold text-tertiary-900">
-              Ubah Nilai Aslis
+              Ubah Nilai Asli
             </h2>
             <button
               type="button"
