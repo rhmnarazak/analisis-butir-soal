@@ -2,7 +2,6 @@ import { AlertTriangle, Ban, CircleCheck, CircleX } from "lucide-react";
 import { useRef } from "react";
 import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
 import {
-  getAlasanPerluPerhatian,
   getAnalisisProgress,
   getDistraktorPercent,
   getDistraktorStatus,
@@ -70,38 +69,22 @@ export function StatusPill({
 // offset — same technique as the sticky tables elsewhere in this app.
 const NO_WIDTH = 64;
 const SOAL_WIDTH = 210;
-const ALASAN_WIDTH = 260;
 const STICKY_SHADOW = "shadow-[3px_0px_5px_-3px_rgba(0,0,0,0.1)]";
 
-// The per-soal analysis table shared by AnalisisDetailPage's own "Semua
-// Soal" list and SoalPerluPerhatianDialog's filtered popup — one
-// implementation so the two can never show different columns/values for the
-// same soal. `showAlasan` adds the "Alasan" column (why a soal was flagged
-// Perlu Ditinjau/Diperbaiki) that only the popup needs.
+// The per-soal analysis table used by AnalisisDetailPage's own "Semua Soal"
+// list — one implementation so any future reuse can't drift on
+// columns/values for the same soal.
 export function AnalisisSoalTable({
   rows,
   onRowClick,
-  showAlasan = false,
 }: {
   rows: { q: QuestionAnalysis; hasil: HasilAnalisis }[];
   onRowClick?: (q: QuestionAnalysis) => void;
-  showAlasan?: boolean;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   useHorizontalWheelScroll(scrollRef);
 
-  const headers = [
-    "No",
-    "Soal",
-    "Jenis",
-    "Validitas",
-    "Kesukaran",
-    "Daya Pembeda",
-    "Distraktor",
-    "Analisis",
-    "Hasil Analisis",
-    ...(showAlasan ? ["Alasan"] : []),
-  ];
+  const headers = ["No", "Soal", "Jenis", "Validitas", "Kesukaran", "Daya Pembeda", "Distraktor", "Analisis", "Hasil Analisis"];
 
   return (
     <div ref={scrollRef} className="overflow-x-auto rounded-xl border border-tertiary-300">
@@ -116,7 +99,6 @@ export function AnalisisSoalTable({
           <col style={{ width: 150, minWidth: 150 }} />
           <col style={{ width: 140, minWidth: 140 }} />
           <col style={{ width: 170, minWidth: 170 }} />
-          {showAlasan && <col style={{ width: ALASAN_WIDTH, minWidth: ALASAN_WIDTH }} />}
         </colgroup>
         <thead>
           <tr>
@@ -146,7 +128,6 @@ export function AnalisisSoalTable({
             const analisisProgress = getAnalisisProgress(q);
             const hasilStyle = HASIL_STYLES[hasil];
             const analisisStyle = ANALISIS_STYLES[analisisProgress];
-            const alasan = showAlasan ? getAlasanPerluPerhatian(q) : [];
             return (
               <tr
                 key={q.no}
@@ -244,22 +225,6 @@ export function AnalisisSoalTable({
                 <td className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 transition-colors group-hover:bg-tertiary-100">
                   <StatusPill label={hasil} className={hasilStyle.className} icon={hasilStyle.icon} />
                 </td>
-                {showAlasan && (
-                  <td className="border-b border-tertiary-300 bg-white px-4 py-4 text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100">
-                    {alasan.length > 0 ? (
-                      <ul className="flex flex-col gap-1">
-                        {alasan.map((a) => (
-                          <li key={a.kriteria} className="whitespace-nowrap">
-                            <span className="text-tertiary-600">{a.kriteria}:</span>{" "}
-                            <span className="font-semibold text-error-500">{a.detail}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span className="text-tertiary-600">—</span>
-                    )}
-                  </td>
-                )}
               </tr>
             );
           })}

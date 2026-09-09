@@ -5,6 +5,7 @@ import { AnalisisDetailPage } from "./pages/AnalisisDetailPage";
 import { AssessmentDetailPage } from "./pages/AssessmentDetailPage";
 import { AssessmentListPage } from "./pages/AssessmentListPage";
 import { SoalDetailPage } from "./pages/SoalDetailPage";
+import { SoalPerluPerhatianPage } from "./pages/SoalPerluPerhatianPage";
 import { AssessmentStoreProvider } from "./state/AssessmentStore";
 
 function App() {
@@ -18,6 +19,11 @@ function App() {
         </Route>
         {/* Full page, no sidebar/navbar — matches Figma node 5986-73118. */}
         <Route path="asesmen/:id/analisis-butir-soal/soal/:no" element={<SoalDetailPage />} />
+        {/* Full page, no sidebar/navbar — matches Figma node 6028-117879. */}
+        <Route
+          path="asesmen/:id/analisis-butir-soal/soal-perlu-perhatian"
+          element={<SoalPerluPerhatianPage />}
+        />
       </Routes>
       <SnackbarHost />
     </AssessmentStoreProvider>

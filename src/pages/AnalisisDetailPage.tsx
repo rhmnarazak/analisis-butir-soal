@@ -22,7 +22,6 @@ import { Breadcrumbs } from "../components/assessment/Breadcrumbs";
 import { AnalisisSoalTable } from "../components/detail/AnalisisSoalTable";
 import { ChartCard, formatPercent, LegendRow, Pill, StackedSegments } from "../components/detail/ChartCardKit";
 import { RingkasanKualitasPaketSoal } from "../components/detail/RingkasanKualitasPaketSoal";
-import { SoalPerluPerhatianDialog } from "../components/detail/SoalPerluPerhatianDialog";
 import { getQuestionsForAssessment, getReliabilitasForAssessment } from "../data/questionAnalysis";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { getAnalisisRunInfo } from "../lib/analisisInfo";
@@ -172,7 +171,6 @@ export function AnalisisDetailPage() {
   const [sortOpen, setSortOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
-  const [showPerluPerhatian, setShowPerluPerhatian] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -295,7 +293,7 @@ export function AnalisisDetailPage() {
         assessment={assessment}
         stats={stats}
         jumlahPeserta={assessment.jumlahPeserta}
-        onTinjauSoalPerluPerhatian={() => setShowPerluPerhatian(true)}
+        onTinjauSoalPerluPerhatian={() => navigate(`/asesmen/${assessment.id}/analisis-butir-soal/soal-perlu-perhatian`)}
       />
 
       <div className="flex flex-col gap-4 rounded-[22px] bg-white p-5 shadow-[0_4px_10px_rgba(51,51,51,0.04)]">
@@ -554,15 +552,6 @@ export function AnalisisDetailPage() {
         </div>
       </div>
 
-      <SoalPerluPerhatianDialog
-        open={showPerluPerhatian}
-        onClose={() => setShowPerluPerhatian(false)}
-        questions={questionAnalysis}
-        onSelectSoal={(q) => {
-          setShowPerluPerhatian(false);
-          navigate(`/asesmen/${assessment.id}/analisis-butir-soal/soal/${q.no}`);
-        }}
-      />
     </>
   );
 }
