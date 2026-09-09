@@ -135,12 +135,42 @@ export function getAnalisisProgress(q: QuestionAnalysis): AnalisisProgress {
   return q.distraktor ? "Lengkap" : "Sebagian";
 }
 
-// ---- Rule F: Hasil Analisis. Daya Pembeda Rendah/Rendah Sekali is an
-// automatic disqualifier; otherwise count how many of the 4 metrics are
-// non-ideal ("bermasalah") — 0 => Layak Digunakan, 1-3 => Perlu Ditinjau,
-// all 4 => Perlu Diperbaiki. Distraktor is skipped entirely when it wasn't
-// analyzed (non-"pilihanGanda" jenis), so it alone can never push a soal to
-// "Perlu Diperbaiki" via the all-4-problems path. ----
+// Green/yellow/red tier per label — the same severity the table colors
+// Validitas/Kesukaran/Daya Pembeda by (see KESUKARAN_STYLES/
+// DAYA_PEMBEDA_STYLES in AnalisisSoalTable.tsx). Validitas has no yellow
+// tier: it's a strict Valid/Tidak Valid call.
+type MetricSeverity = "green" | "yellow" | "red";
+
+const KESUKARAN_SEVERITY: Record<DifficultyLevel, MetricSeverity> = {
+  "Sangat Mudah": "red",
+  Mudah: "yellow",
+  Sedang: "green",
+  Sukar: "yellow",
+  "Sangat Sukar": "red",
+};
+
+const DAYA_PEMBEDA_SEVERITY: Record<DiscriminationLevel, MetricSeverity> = {
+  "Tinggi Sekali": "green",
+  Tinggi: "green",
+  Sedang: "yellow",
+  Rendah: "red",
+  "Rendah Sekali": "red",
+};
+
+// ---- Rule F: Hasil Analisis.
+//
+// When Distraktor IS analyzed (jenis "pilihanGanda"): Daya Pembeda Rendah/
+// Rendah Sekali is an automatic disqualifier; otherwise count how many of
+// the 4 metrics are non-ideal ("bermasalah") — 0 => Layak Digunakan, 1-3 =>
+// Perlu Ditinjau, all 4 => Perlu Diperbaiki.
+//
+// When Distraktor ISN'T analyzed (non-"pilihanGanda" jenis, so only 3
+// metrics apply), the count-based rule above can never reach "all
+// problems" — so the verdict instead follows the worst color/severity
+// among Validitas/Kesukaran/Daya Pembeda directly: any one red (Tidak
+// Valid, Sangat Mudah/Sukar, or Daya Pembeda Rendah/Rendah Sekali) =>
+// Perlu Diperbaiki; else any yellow (Mudah/Sukar, or Daya Pembeda Sedang)
+// => Perlu Ditinjau; all green => Layak Digunakan. ----
 export function getHasilAnalisis(q: QuestionAnalysis): HasilAnalisis {
   if (!q.validitas || !q.tingkatKesukaran || !q.dayaPembeda) return "Tidak Dianalisis";
 
@@ -148,11 +178,22 @@ export function getHasilAnalisis(q: QuestionAnalysis): HasilAnalisis {
     return "Perlu Diperbaiki";
   }
 
+  if (!q.distraktor) {
+    const severities: MetricSeverity[] = [
+      q.validitas.label === "Valid" ? "green" : "red",
+      KESUKARAN_SEVERITY[q.tingkatKesukaran.label],
+      DAYA_PEMBEDA_SEVERITY[q.dayaPembeda.label],
+    ];
+    if (severities.includes("red")) return "Perlu Diperbaiki";
+    if (severities.includes("yellow")) return "Perlu Ditinjau";
+    return "Layak Digunakan";
+  }
+
   let problems = 0;
   if (q.validitas.label !== "Valid") problems += 1;
   if (q.tingkatKesukaran.label !== "Sedang") problems += 1;
   if (q.dayaPembeda.label !== "Tinggi" && q.dayaPembeda.label !== "Tinggi Sekali") problems += 1;
-  if (q.distraktor && q.distraktor.label === "Tidak Efektif") problems += 1;
+  if (q.distraktor.label === "Tidak Efektif") problems += 1;
 
   if (problems >= 4) return "Perlu Diperbaiki";
   if (problems >= 1) return "Perlu Ditinjau";
