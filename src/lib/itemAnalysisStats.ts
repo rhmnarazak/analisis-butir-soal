@@ -167,6 +167,44 @@ export function getDistraktorPercent(q: QuestionAnalysis): number | null {
   return q.distraktor ? q.distraktor.value * 100 : null;
 }
 
+// Default sort for any "which soal need attention" list: most urgent status
+// first (Perlu Diperbaiki > Perlu Ditinjau > Layak Digunakan), non-analyzable
+// soal pushed to the very end.
+export const HASIL_PRIORITY: Record<HasilAnalisis, number> = {
+  "Perlu Diperbaiki": 0,
+  "Perlu Ditinjau": 1,
+  "Layak Digunakan": 2,
+  "Tidak Dianalisis": 3,
+};
+
+export interface AlasanPerluPerhatian {
+  kriteria: "Validitas" | "Tingkat Kesukaran" | "Daya Pembeda" | "Distraktor";
+  detail: string;
+}
+
+// The exact per-criteria breakdown behind a "Perlu Ditinjau"/"Perlu
+// Diperbaiki" verdict — same 4 checks as getHasilAnalisis()'s "problems"
+// count, kept side by side so they can't drift apart. Empty for a soal
+// that's "Layak Digunakan" (nothing flagged) or "Tidak Dianalisis".
+export function getAlasanPerluPerhatian(q: QuestionAnalysis): AlasanPerluPerhatian[] {
+  if (!q.validitas || !q.tingkatKesukaran || !q.dayaPembeda) return [];
+
+  const alasan: AlasanPerluPerhatian[] = [];
+  if (q.validitas.label !== "Valid") {
+    alasan.push({ kriteria: "Validitas", detail: q.validitas.label });
+  }
+  if (q.tingkatKesukaran.label !== "Sedang") {
+    alasan.push({ kriteria: "Tingkat Kesukaran", detail: q.tingkatKesukaran.label });
+  }
+  if (q.dayaPembeda.label !== "Tinggi" && q.dayaPembeda.label !== "Tinggi Sekali") {
+    alasan.push({ kriteria: "Daya Pembeda", detail: q.dayaPembeda.label });
+  }
+  if (q.distraktor && q.distraktor.label === "Tidak Efektif") {
+    alasan.push({ kriteria: "Distraktor", detail: "Tidak Efektif" });
+  }
+  return alasan;
+}
+
 export interface AnalisisStats {
   totalSoal: number;
   totalAnalyzable: number;

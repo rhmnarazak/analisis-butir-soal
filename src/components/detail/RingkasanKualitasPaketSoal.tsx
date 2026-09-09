@@ -165,7 +165,7 @@ function joinClauses(clauses: ReactNode[]): ReactNode {
 // Buruk, SangatBuruk, 0%). The 100%/0% extremes aren't special-cased — they
 // fall out naturally: 100% has 0 soal needing attention (no callout renders),
 // and 0% has 0 soal layak (the "layak digunakan kembali" clause is dropped).
-function RekomendasiCard({ stats }: { stats: AnalisisStats }) {
+function RekomendasiCard({ stats, onTinjauSoalPerluPerhatian }: { stats: AnalisisStats; onTinjauSoalPerluPerhatian: () => void }) {
   const perluPerhatian = stats.diperbaiki + stats.ditinjau;
   const tone = KUALITAS_TONE_STYLES[getKualitasTone(stats.kualitasLabel)];
   const AlertIcon = tone.alertIcon;
@@ -246,7 +246,8 @@ function RekomendasiCard({ stats }: { stats: AnalisisStats }) {
           </div>
           <button
             type="button"
-            className={`flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-5 text-sm font-semibold text-white ${tone.buttonBg}`}
+            onClick={onTinjauSoalPerluPerhatian}
+            className={`flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-5 text-sm font-semibold text-white transition-colors hover:brightness-95 ${tone.buttonBg}`}
           >
             Tinjau {perluPerhatian} Soal Yang Perlu Perhatian
             <img src={assetUrl("/images/icons/circle-arrow-right-filled.svg")} alt="" className="h-5 w-5" />
@@ -465,10 +466,12 @@ export function RingkasanKualitasPaketSoal({
   assessment,
   stats,
   jumlahPeserta,
+  onTinjauSoalPerluPerhatian,
 }: {
   assessment: Assessment;
   stats: AnalisisStats;
   jumlahPeserta: number;
+  onTinjauSoalPerluPerhatian: () => void;
 }) {
   return (
     <div className="flex flex-col gap-4 rounded-[22px] bg-white p-5 shadow-[0_4px_10px_rgba(51,51,51,0.04)]">
@@ -484,7 +487,7 @@ export function RingkasanKualitasPaketSoal({
 
       <InfoAnalisisCard assessment={assessment} stats={stats} jumlahPeserta={jumlahPeserta} />
 
-      <RekomendasiCard stats={stats} />
+      <RekomendasiCard stats={stats} onTinjauSoalPerluPerhatian={onTinjauSoalPerluPerhatian} />
 
       <div className="flex flex-wrap gap-4">
         <KualitasPaketSoalCard stats={stats} />

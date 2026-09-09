@@ -2,13 +2,11 @@ import {
   AlertOctagon,
   AlertTriangle,
   ArrowUpDown,
-  Ban,
   CalendarDays,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleCheck,
-  CircleX,
   Download,
   FlaskConical,
   GraduationCap,
@@ -21,72 +19,18 @@ import {
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { Breadcrumbs } from "../components/assessment/Breadcrumbs";
+import { AnalisisSoalTable } from "../components/detail/AnalisisSoalTable";
 import { ChartCard, formatPercent, LegendRow, Pill, StackedSegments } from "../components/detail/ChartCardKit";
 import { RingkasanKualitasPaketSoal } from "../components/detail/RingkasanKualitasPaketSoal";
-import { JenisPill } from "../components/detail/SoalTab";
+import { SoalPerluPerhatianDialog } from "../components/detail/SoalPerluPerhatianDialog";
 import { getQuestionsForAssessment, getReliabilitasForAssessment } from "../data/questionAnalysis";
-import { useHorizontalWheelScroll } from "../hooks/useHorizontalWheelScroll";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { getAnalisisRunInfo } from "../lib/analisisInfo";
 import { assetUrl } from "../lib/assetUrl";
 import { exportAnalisisToExcel } from "../lib/exportAnalisisExcel";
-import {
-  buildAnalisisStats,
-  getAnalisisProgress,
-  getDistraktorPercent,
-  getDistraktorStatus,
-  getHasilAnalisis,
-  type AnalisisProgress,
-  type HasilAnalisis,
-} from "../lib/itemAnalysisStats";
+import { buildAnalisisStats, getHasilAnalisis, HASIL_PRIORITY } from "../lib/itemAnalysisStats";
 import { useAssessmentStore } from "../state/AssessmentStore";
-import type { DifficultyLevel, DiscriminationLevel, QuestionAnalysis } from "../types/assessment";
-
-// Per Figma nodes 5981-201734/733/735/736/737: the bar length is a fixed
-// step per difficulty band, not the raw kesukaran value — a soal exactly on
-// the easy/hard extremes (weak discrimination) is flagged red just like its
-// opposite, with "Sedang" as the psychometric sweet spot.
-const KESUKARAN_STYLES: Record<DifficultyLevel, { textClass: string; barClass: string; percent: number }> = {
-  "Sangat Mudah": { textClass: "text-error-500", barClass: "bg-error-500", percent: 100 },
-  Mudah: { textClass: "text-warning-500", barClass: "bg-warning-500", percent: 75 },
-  Sedang: { textClass: "text-success-500", barClass: "bg-primary-600", percent: 50 },
-  Sukar: { textClass: "text-warning-500", barClass: "bg-warning-500", percent: 25 },
-  "Sangat Sukar": { textClass: "text-error-500", barClass: "bg-error-500", percent: 0 },
-};
-
-// Per Figma nodes 5981-201777/778/779/780/781: same fixed-step-per-band
-// pattern as Kesukaran, but here higher is always better (no U-shape).
-const DAYA_PEMBEDA_STYLES: Record<DiscriminationLevel, { textClass: string; barClass: string; percent: number }> = {
-  "Tinggi Sekali": { textClass: "text-success-700", barClass: "bg-success-700", percent: 100 },
-  Tinggi: { textClass: "text-success-500", barClass: "bg-success-500", percent: 75 },
-  Sedang: { textClass: "text-warning-500", barClass: "bg-warning-500", percent: 50 },
-  Rendah: { textClass: "text-error-500", barClass: "bg-error-500", percent: 25 },
-  "Rendah Sekali": { textClass: "text-error-700", barClass: "bg-error-700", percent: 0 },
-};
-
-const HASIL_STYLES: Record<HasilAnalisis, { className: string; icon: typeof AlertTriangle }> = {
-  "Layak Digunakan": { className: "bg-success-50 border-success-200 text-success-500", icon: CircleCheck },
-  "Perlu Ditinjau": { className: "bg-secondary-50 border-secondary-200 text-warning-500", icon: AlertTriangle },
-  "Perlu Diperbaiki": { className: "bg-error-50 border-error-200 text-error-500", icon: CircleX },
-  "Tidak Dianalisis": { className: "bg-tertiary-50 border-tertiary-200 text-tertiary-600", icon: Ban },
-};
-
-const ANALISIS_STYLES: Record<AnalisisProgress, { className: string; icon: typeof AlertTriangle }> = {
-  Lengkap: { className: "bg-success-50 border-success-200 text-success-500", icon: CircleCheck },
-  Sebagian: { className: "bg-secondary-50 border-secondary-200 text-warning-500", icon: AlertTriangle },
-  "Tidak Ada": { className: "bg-tertiary-50 border-tertiary-200 text-tertiary-600", icon: Ban },
-};
-
-function StatusPill({ label, className, icon: Icon }: { label: string; className: string; icon: typeof AlertTriangle }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-[26px] border px-2.5 py-0.5 text-xs font-semibold ${className}`}
-    >
-      <Icon size={12} />
-      {label}
-    </span>
-  );
-}
+import type { DifficultyLevel, DiscriminationLevel } from "../types/assessment";
 
 // Status-chip styling for each distribution card's headline pill. Kesukaran
 // is U-shaped (per Figma nodes 5924-126463/740/855/978/127082): every tier
@@ -214,26 +158,11 @@ function DistributionCard({
 const TABS = ["Semua", "Perlu Diperbaiki", "Perlu Ditinjau", "Layak Digunakan", "Tidak Dianalisis"] as const;
 type TabValue = (typeof TABS)[number];
 
-// Default sort: most urgent status first (Perlu Diperbaiki > Perlu Ditinjau >
-// Layak Digunakan), with non-analyzable soal pushed to the very end.
-const HASIL_PRIORITY: Record<HasilAnalisis, number> = {
-  "Perlu Diperbaiki": 0,
-  "Perlu Ditinjau": 1,
-  "Layak Digunakan": 2,
-  "Tidak Dianalisis": 3,
-};
-
 const SORT_OPTIONS = [
   { value: "prioritas", label: "Perlu Perhatian" },
   { value: "nomor", label: "No. Soal" },
 ] as const;
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
-
-// Fixed column widths so the sticky No/Soal columns have a stable left
-// offset — same technique as the sticky tables elsewhere in this app.
-const NO_WIDTH = 64;
-const SOAL_WIDTH = 210;
-const STICKY_SHADOW = "shadow-[3px_0px_5px_-3px_rgba(0,0,0,0.1)]";
 
 export function AnalisisDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -243,8 +172,7 @@ export function AnalisisDetailPage() {
   const [sortOpen, setSortOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const sortRef = useRef<HTMLDivElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  useHorizontalWheelScroll(scrollRef);
+  const [showPerluPerhatian, setShowPerluPerhatian] = useState(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -363,7 +291,12 @@ export function AnalisisDetailPage() {
         </div>
       </div>
 
-      <RingkasanKualitasPaketSoal assessment={assessment} stats={stats} jumlahPeserta={assessment.jumlahPeserta} />
+      <RingkasanKualitasPaketSoal
+        assessment={assessment}
+        stats={stats}
+        jumlahPeserta={assessment.jumlahPeserta}
+        onTinjauSoalPerluPerhatian={() => setShowPerluPerhatian(true)}
+      />
 
       <div className="flex flex-col gap-4 rounded-[22px] bg-white p-5 shadow-[0_4px_10px_rgba(51,51,51,0.04)]">
         <span className="text-base font-semibold text-tertiary-900">Kualitas dan Distribusi Butir Soal</span>
@@ -590,154 +523,10 @@ export function AnalisisDetailPage() {
           })}
         </div>
 
-        <div ref={scrollRef} className="overflow-x-auto rounded-xl border border-tertiary-300">
-          <table className="border-separate border-spacing-0 text-left">
-            <colgroup>
-              <col style={{ width: NO_WIDTH, minWidth: NO_WIDTH }} />
-              <col style={{ width: SOAL_WIDTH, minWidth: SOAL_WIDTH }} />
-              <col style={{ width: 150, minWidth: 150 }} />
-              <col style={{ width: 140, minWidth: 140 }} />
-              <col style={{ width: 150, minWidth: 150 }} />
-              <col style={{ width: 150, minWidth: 150 }} />
-              <col style={{ width: 150, minWidth: 150 }} />
-              <col style={{ width: 140, minWidth: 140 }} />
-              <col style={{ width: 170, minWidth: 170 }} />
-            </colgroup>
-            <thead>
-              <tr>
-                {["No", "Soal", "Jenis", "Validitas", "Kesukaran", "Daya Pembeda", "Distraktor", "Analisis", "Hasil Analisis"].map(
-                  (header, i) => (
-                    <th
-                      key={header}
-                      style={
-                        i === 0
-                          ? { position: "sticky", left: 0, zIndex: 2 }
-                          : i === 1
-                            ? { position: "sticky", left: NO_WIDTH, zIndex: 2 }
-                            : undefined
-                      }
-                      className={`whitespace-nowrap border-b border-tertiary-300 bg-tertiary-50 px-4 py-4 text-sm font-bold text-tertiary-900 ${
-                        i === 1 ? STICKY_SHADOW : ""
-                      }`}
-                    >
-                      {header}
-                    </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map(({ q, hasil }: { q: QuestionAnalysis; hasil: HasilAnalisis }) => {
-                const distraktor = getDistraktorStatus(q);
-                const distraktorPercent = getDistraktorPercent(q);
-                const analisisProgress = getAnalisisProgress(q);
-                const hasilStyle = HASIL_STYLES[hasil];
-                const analisisStyle = ANALISIS_STYLES[analisisProgress];
-                return (
-                  <tr
-                    key={q.no}
-                    className="group cursor-pointer"
-                    onClick={() => navigate(`/asesmen/${assessment.id}/analisis-butir-soal/soal/${q.no}`)}
-                  >
-                    <td
-                      style={{ position: "sticky", left: 0, zIndex: 1 }}
-                      className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100"
-                    >
-                      {q.no}
-                    </td>
-                    <td
-                      style={{ position: "sticky", left: NO_WIDTH, zIndex: 1 }}
-                      className={`border-b border-tertiary-300 bg-white px-4 py-4 text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100 ${STICKY_SHADOW}`}
-                    >
-                      <span className="line-clamp-2">{q.cuplikanSoal}</span>
-                    </td>
-                    <td className="border-b border-tertiary-300 bg-white px-4 py-4 transition-colors group-hover:bg-tertiary-100">
-                      <JenisPill jenis={q.jenis} />
-                    </td>
-                    <td className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100">
-                      {q.validitas ? (
-                        <div className="flex items-center gap-2">
-                          <span>{q.validitas.value.toFixed(2)}</span>
-                          <span
-                            className={`font-semibold ${
-                              q.validitas.label === "Valid" ? "text-success-500" : "text-error-500"
-                            }`}
-                          >
-                            {q.validitas.label}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-tertiary-600">Tidak Dianalisis</span>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100">
-                      {q.tingkatKesukaran ? (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
-                            <span>{q.tingkatKesukaran.value.toFixed(2)}</span>
-                            <span className={`font-semibold ${KESUKARAN_STYLES[q.tingkatKesukaran.label].textClass}`}>
-                              {q.tingkatKesukaran.label}
-                            </span>
-                          </div>
-                          <div className="h-0.5 w-[72px] overflow-hidden rounded-full bg-tertiary-100">
-                            <div
-                              className={`h-full rounded-full ${KESUKARAN_STYLES[q.tingkatKesukaran.label].barClass}`}
-                              style={{ width: `${KESUKARAN_STYLES[q.tingkatKesukaran.label].percent}%` }}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-tertiary-600">Tidak Dianalisis</span>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100">
-                      {q.dayaPembeda ? (
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2">
-                            <span>{q.dayaPembeda.value.toFixed(2)}</span>
-                            <span className={`font-semibold ${DAYA_PEMBEDA_STYLES[q.dayaPembeda.label].textClass}`}>
-                              {q.dayaPembeda.label}
-                            </span>
-                          </div>
-                          <div className="h-0.5 w-[72px] overflow-hidden rounded-full bg-tertiary-100">
-                            <div
-                              className={`h-full rounded-full ${DAYA_PEMBEDA_STYLES[q.dayaPembeda.label].barClass}`}
-                              style={{ width: `${DAYA_PEMBEDA_STYLES[q.dayaPembeda.label].percent}%` }}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-tertiary-600">Tidak Dianalisis</span>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 text-sm text-tertiary-900 transition-colors group-hover:bg-tertiary-100">
-                      {distraktor === "Tidak Dianalisis" ? (
-                        <span className="text-tertiary-600">Tidak Dianalisis</span>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <span>{distraktorPercent?.toFixed(1).replace(".", ",")}%</span>
-                          <span
-                            className={`font-semibold ${
-                              distraktor === "Efektif" ? "text-success-500" : "text-error-500"
-                            }`}
-                          >
-                            {distraktor}
-                          </span>
-                        </div>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 transition-colors group-hover:bg-tertiary-100">
-                      <StatusPill label={analisisProgress} className={analisisStyle.className} icon={analisisStyle.icon} />
-                    </td>
-                    <td className="whitespace-nowrap border-b border-tertiary-300 bg-white px-4 py-4 transition-colors group-hover:bg-tertiary-100">
-                      <StatusPill label={hasil} className={hasilStyle.className} icon={hasilStyle.icon} />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <AnalisisSoalTable
+          rows={rows}
+          onRowClick={(q) => navigate(`/asesmen/${assessment.id}/analisis-butir-soal/soal/${q.no}`)}
+        />
 
         <div className="flex items-center justify-between gap-4">
           <span className="text-sm text-tertiary-600">
@@ -764,6 +553,16 @@ export function AnalisisDetailPage() {
           </div>
         </div>
       </div>
+
+      <SoalPerluPerhatianDialog
+        open={showPerluPerhatian}
+        onClose={() => setShowPerluPerhatian(false)}
+        questions={questionAnalysis}
+        onSelectSoal={(q) => {
+          setShowPerluPerhatian(false);
+          navigate(`/asesmen/${assessment.id}/analisis-butir-soal/soal/${q.no}`);
+        }}
+      />
     </>
   );
 }
