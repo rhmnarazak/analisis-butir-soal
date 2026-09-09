@@ -86,6 +86,7 @@ export function AssessmentDetailPage() {
 
           {tab === "Peserta" && (
             <PesertaTab
+              assessmentId={assessment.id}
               participants={visibleParticipants}
               kkm={assessment.kkm}
               pesertaDinilai={assessment.pesertaDinilai}

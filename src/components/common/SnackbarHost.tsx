@@ -1,14 +1,15 @@
 import { CircleCheck, Info } from "lucide-react";
 import { createPortal } from "react-dom";
-import { useAssessmentStore } from "../../state/AssessmentStore";
+import { useAssessmentStore, type SnackbarState } from "../../state/AssessmentStore";
+
+type Content = { tone: "information" | "success"; title: string; body: string; Icon: typeof Info; width: number };
 
 // Bottom-right toast per Figma nodes 5859-339405 (pending), 5859-335806
 // (success-run), 5859-336978 (success-update) — a "reset" variant (not in
 // Figma) reuses the success card's look for the checkpoint-restore action.
-const CONTENT: Record<
-  "pending" | "success-run" | "success-update" | "reset",
-  { tone: "information" | "success"; title: string; body: string; Icon: typeof Info; width: number }
-> = {
+// "nilai-updated" (Figma node 6018-92280) is handled separately below since
+// its body embeds the edited participant's name.
+const CONTENT: Record<"pending" | "success-run" | "success-update" | "reset", Content> = {
   // Card width follows Figma's own per-variant "Toast" frame width (frame
   // width minus its 30px right padding) — the success cards' longer body
   // copy gets a wider card (443px) so it still wraps to exactly 2 lines
@@ -49,11 +50,24 @@ const TONE_CLASSES: Record<"information" | "success", { bg: string; border: stri
   success: { bg: "bg-success-100", border: "border-success-300", title: "text-success-600" },
 };
 
+function getContent(snackbar: SnackbarState): Content {
+  if (snackbar.kind === "nilai-updated") {
+    return {
+      tone: "success",
+      title: "Nilai Berhasil Diubah",
+      body: `Nilai untuk ${snackbar.participantName} berhasil diperbarui.`,
+      Icon: CircleCheck,
+      width: 443,
+    };
+  }
+  return CONTENT[snackbar.kind];
+}
+
 export function SnackbarHost() {
   const { snackbar, dismissSnackbar } = useAssessmentStore();
   if (!snackbar) return null;
 
-  const content = CONTENT[snackbar.kind];
+  const content = getContent(snackbar);
   const tone = TONE_CLASSES[content.tone];
   const Icon = content.Icon;
 

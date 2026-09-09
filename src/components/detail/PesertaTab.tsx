@@ -1,19 +1,12 @@
-import {
-  AlertTriangle,
-  Check,
-  CircleCheck,
-  Info,
-  ListFilter,
-  MoreVertical,
-  Search,
-  Sparkles,
-  SquarePen,
-} from "lucide-react";
+import { AlertTriangle, Check, CircleCheck, Info, ListFilter, Search, Sparkles, SquarePen } from "lucide-react";
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
 import { nilaiStatusFor, parsePesertaDinilai } from "../../lib/participantStatus";
-import { InfoTooltip } from "../common/InfoTooltip";
+import { useAssessmentStore } from "../../state/AssessmentStore";
 import type { AssessmentStatus, Participant, QuestionTypeKey } from "../../types/assessment";
+import { InfoTooltip } from "../common/InfoTooltip";
+import { PesertaAksiMenu } from "./PesertaAksiMenu";
+import { UbahNilaiDialog } from "./UbahNilaiDialog";
 
 function ProgressPill({ done, total }: { done: number; total: number }) {
   const complete = done === total;
@@ -118,6 +111,7 @@ function buildLeafColumns(
   toggleOne: (id: string) => void,
   belumCount: number,
   kkm: number,
+  onUbahNilai: (p: Participant) => void,
 ): LeafColumn[] {
   return [
     {
@@ -184,15 +178,10 @@ function buildLeafColumns(
       id: "aksi",
       width: 72,
       sticky: "right",
-      render: (p) => (
-        <button
-          type="button"
-          onClick={(event) => event.stopPropagation()}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-primary-500 text-primary-500"
-          aria-label={`Aksi ${p.nama}`}
-        >
-          <MoreVertical size={16} />
-        </button>
+      // "Ubah Nilai" is only meaningful once the participant has a Nilai
+      // Asli to edit — disabled while still "Perlu Dinilai".
+      render: (p, index) => (
+        <PesertaAksiMenu participantName={p.nama} disabled={index < belumCount} onUbahNilai={() => onUbahNilai(p)} />
       ),
     },
   ];
@@ -205,6 +194,7 @@ const STICKY_LEFT_EDGE_SHADOW = "shadow-[3px_0px_5px_-3px_rgba(0,0,0,0.1)]";
 const STICKY_RIGHT_EDGE_SHADOW = "shadow-[-3px_0px_5px_-3px_rgba(0,0,0,0.1)]";
 
 export function PesertaTab({
+  assessmentId,
   participants,
   kkm,
   pesertaDinilai,
@@ -213,6 +203,7 @@ export function PesertaTab({
   publikasiInfo,
   onRowClick,
 }: {
+  assessmentId: string;
   participants: Participant[];
   kkm: number;
   pesertaDinilai: string;
@@ -227,11 +218,23 @@ export function PesertaTab({
   onRowClick?: () => void;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
+  const { nilaiOverrides, updateNilaiPeserta } = useAssessmentStore();
   const { dinilai, total } = parsePesertaDinilai(pesertaDinilai);
   const belumCount = Math.min(Math.max(0, total - dinilai), participants.length);
   const incompleteCount = belumCount;
   const scrollRef = useRef<HTMLDivElement>(null);
   useHorizontalWheelScroll(scrollRef);
+
+  // Nilai Penyesuaian edits are scoped per-assessment (see nilaiOverrides in
+  // AssessmentStore) so they never bleed into another assessment that
+  // happens to share the same participant from the shared roster.
+  const overridesForAssessment = nilaiOverrides[assessmentId];
+  const effectiveParticipants = overridesForAssessment
+    ? participants.map((p) =>
+        p.id in overridesForAssessment ? { ...p, nilaiPenyesuaian: overridesForAssessment[p.id] } : p,
+      )
+    : participants;
 
   const toggleAll = () => {
     setSelected((prev) =>
@@ -246,7 +249,7 @@ export function PesertaTab({
     });
   };
 
-  const leafColumns = buildLeafColumns(selected, toggleOne, belumCount, kkm);
+  const leafColumns = buildLeafColumns(selected, toggleOne, belumCount, kkm, setEditingParticipant);
 
   const rightOffsets = new Map<string, number>();
   {
@@ -445,7 +448,7 @@ export function PesertaTab({
             </tr>
           </thead>
           <tbody>
-            {participants.map((p, index) => (
+            {effectiveParticipants.map((p, index) => (
               <tr
                 key={p.id}
                 className={`group ${onRowClick ? "cursor-pointer" : ""}`}
@@ -465,6 +468,20 @@ export function PesertaTab({
           </tbody>
         </table>
       </div>
+
+      <UbahNilaiDialog
+        open={editingParticipant !== null}
+        participantName={editingParticipant?.nama ?? ""}
+        nilaiAsli={editingParticipant?.nilaiAsli ?? 0}
+        currentNilaiPenyesuaian={editingParticipant?.nilaiPenyesuaian ?? null}
+        onCancel={() => setEditingParticipant(null)}
+        onSave={(nilaiBaru) => {
+          if (editingParticipant) {
+            updateNilaiPeserta(assessmentId, editingParticipant.id, nilaiBaru, editingParticipant.nama);
+          }
+          setEditingParticipant(null);
+        }}
+      />
     </div>
   );
 }

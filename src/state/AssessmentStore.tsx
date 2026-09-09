@@ -6,13 +6,31 @@ import type { Assessment } from "../types/assessment";
 
 const CHECKPOINT_KEY = "anbuso.checkpoint";
 const CURRENT_KEY = "anbuso.current";
+const OVERRIDES_KEY = "anbuso.nilaiOverrides";
 const ANALYSIS_DELAY_MS = 5000;
 const SUCCESS_SNACKBAR_MS = 4000;
 const RESET_SNACKBAR_MS = 3000;
 
 export type SnackbarState =
   | { kind: "pending" | "success-run" | "success-update"; assessmentId: string }
-  | { kind: "reset" };
+  | { kind: "reset" }
+  | { kind: "nilai-updated"; participantName: string };
+
+// assessmentId -> participantId -> Nilai Penyesuaian (absolute 0-100 score).
+// Kept separate from `participants` (a shared read-only roster reused
+// across assessments) so an edit made from one assessment's Peserta tab
+// never bleeds into another assessment showing the same participant.
+type NilaiOverrides = Record<string, Record<string, number>>;
+
+function loadOverrides(): NilaiOverrides {
+  try {
+    const raw = localStorage.getItem(OVERRIDES_KEY);
+    if (raw) return JSON.parse(raw) as NilaiOverrides;
+  } catch {
+    // fall through
+  }
+  return {};
+}
 
 // The checkpoint is the "data awal" the user can always return to — seeded
 // once from the static mock data, then left alone (resetToCheckpoint reads
@@ -56,6 +74,12 @@ interface AssessmentStoreValue {
   resetToCheckpoint: () => void;
   snackbar: SnackbarState | null;
   dismissSnackbar: () => void;
+  /** assessmentId -> participantId -> Nilai Penyesuaian override, see NilaiOverrides above. */
+  nilaiOverrides: NilaiOverrides;
+  /** Ubah Nilai flow: sets a participant's Nilai Penyesuaian for this assessment; if the
+   * assessment is already "Selesai", flips its AnBuSo state to "Perbarui Hasil Analisis"
+   * (surfaces as the "Publikasi Ulang" status everywhere via needsRepublish()). */
+  updateNilaiPeserta: (assessmentId: string, participantId: string, nilaiBaru: number, participantName: string) => void;
 }
 
 const AssessmentStoreContext = createContext<AssessmentStoreValue | null>(null);
@@ -64,6 +88,7 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
   const [assessments, setAssessments] = useState<Assessment[]>(() => loadCurrent(loadCheckpoint()));
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [snackbar, setSnackbar] = useState<SnackbarState | null>(null);
+  const [nilaiOverrides, setNilaiOverrides] = useState<NilaiOverrides>(() => loadOverrides());
   const timers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const snackbarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -74,6 +99,14 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
       // ignore persistence failures
     }
   }, [assessments]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(OVERRIDES_KEY, JSON.stringify(nilaiOverrides));
+    } catch {
+      // ignore persistence failures
+    }
+  }, [nilaiOverrides]);
 
   // Timers are owned by the provider (not by whichever component triggered
   // them) so a 5s analysis run keeps counting down across navigation.
@@ -160,11 +193,27 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
     [assessments, pendingIds, showSnackbar, updateAssessment],
   );
 
+  const updateNilaiPeserta = useCallback(
+    (assessmentId: string, participantId: string, nilaiBaru: number, participantName: string) => {
+      setNilaiOverrides((prev) => ({
+        ...prev,
+        [assessmentId]: { ...prev[assessmentId], [participantId]: nilaiBaru },
+      }));
+      const assessment = assessments.find((a) => a.id === assessmentId);
+      if (assessment?.status === "Selesai") {
+        updateAssessment(assessmentId, { anbusoState: "Perbarui Hasil Analisis" });
+      }
+      showSnackbar({ kind: "nilai-updated", participantName }, SUCCESS_SNACKBAR_MS);
+    },
+    [assessments, showSnackbar, updateAssessment],
+  );
+
   const resetToCheckpoint = useCallback(() => {
     timers.current.forEach((t) => clearTimeout(t));
     timers.current.clear();
     setPendingIds(new Set());
     setAssessments(structuredClone(loadCheckpoint()));
+    setNilaiOverrides({});
     showSnackbar({ kind: "reset" }, RESET_SNACKBAR_MS);
   }, [showSnackbar]);
 
@@ -183,6 +232,8 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
     resetToCheckpoint,
     snackbar,
     dismissSnackbar,
+    nilaiOverrides,
+    updateNilaiPeserta,
   };
 
   return <AssessmentStoreContext.Provider value={value}>{children}</AssessmentStoreContext.Provider>;
