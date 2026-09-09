@@ -1,9 +1,9 @@
-import { AlertTriangle, Check, ListFilter, MoreVertical, Search, SquarePen } from "lucide-react";
+import { AlertTriangle, Check, CircleCheck, Info, ListFilter, MoreVertical, Search, SquarePen } from "lucide-react";
 import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
 import { parsePesertaDinilai, statusFor } from "../../lib/participantStatus";
 import { InfoTooltip } from "../common/InfoTooltip";
-import type { Participant, QuestionTypeKey } from "../../types/assessment";
+import type { AssessmentStatus, Participant, QuestionTypeKey } from "../../types/assessment";
 
 function ProgressPill({ done, total }: { done: number; total: number }) {
   const complete = done === total;
@@ -186,11 +186,15 @@ export function PesertaTab({
   participants,
   kkm,
   pesertaDinilai,
+  status,
+  publikasiInfo,
   onRowClick,
 }: {
   participants: Participant[];
   kkm: number;
   pesertaDinilai: string;
+  status: AssessmentStatus;
+  publikasiInfo: { tanggal: string; oleh: string };
   // Set only while the assessment is still "Perlu Dinilai" — clicking any
   // row then opens the "skip grading, mark everyone Selesai" confirmation.
   onRowClick?: () => void;
@@ -276,6 +280,30 @@ export function PesertaTab({
           <p className="text-sm text-tertiary-900">
             Terdapat {incompleteCount} siswa yang belum selesai dinilai. Silakan selesaikan dan
             publikasi penilaian.
+          </p>
+        </div>
+      )}
+
+      {status === "Siap Dipublikasi" && (
+        <div className="flex items-start gap-3 rounded-lg border border-information-500 border-l-4 bg-information-25 p-4">
+          <span className="flex shrink-0 items-center justify-center rounded-full bg-information-500 p-1">
+            <Info size={14} className="text-white" />
+          </span>
+          <p className="text-sm text-tertiary-900">
+            Semua peserta sudah dinilai. Nilai sudah siap untuk dipublikasikan.
+          </p>
+        </div>
+      )}
+
+      {status === "Selesai" && (
+        <div className="flex items-start gap-3 rounded-lg border border-success-500 border-l-4 bg-success-25 p-4">
+          <span className="flex shrink-0 items-center justify-center rounded-full bg-success-500 p-1">
+            <CircleCheck size={14} className="text-white" />
+          </span>
+          <p className="text-sm text-tertiary-900">
+            Nilai telah dipublikasikan. Perubahan nilai dapat dipublikasikan kembali kapan saja.
+            <br />
+            Publikasi terakhir: <strong>{publikasiInfo.tanggal}</strong> oleh <strong>{publikasiInfo.oleh}</strong>
           </p>
         </div>
       )}

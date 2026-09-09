@@ -37,6 +37,10 @@ export interface Assessment {
   dianalisisPada?: string;
   dianalisisOleh?: string;
   analisisKind?: "run" | "update";
+  // Set by AssessmentStore.publishNilai() — undefined until nilai is
+  // published at least once (shown on the Peserta tab's "Selesai" banner).
+  nilaiDipublikasikanPada?: string;
+  nilaiDipublikasikanOleh?: string;
 }
 
 export interface QuestionTypeScore {

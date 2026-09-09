@@ -12,6 +12,7 @@ import { SummaryCard } from "../components/detail/SummaryCard";
 import { participants } from "../data/participants";
 import { getQuestionsForAssessment } from "../data/questionAnalysis";
 import { usePageTitle } from "../hooks/usePageTitle";
+import { getPublikasiInfo } from "../lib/analisisInfo";
 import { countAnalyzableSoal } from "../lib/soalAnalysis";
 import { useAssessmentStore } from "../state/AssessmentStore";
 
@@ -88,6 +89,8 @@ export function AssessmentDetailPage() {
               participants={visibleParticipants}
               kkm={assessment.kkm}
               pesertaDinilai={assessment.pesertaDinilai}
+              status={assessment.status}
+              publikasiInfo={getPublikasiInfo(assessment)}
               onRowClick={
                 assessment.status === "Perlu Dinilai" ? () => setPendingConfirm("completePeserta") : undefined
               }

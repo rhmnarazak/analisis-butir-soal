@@ -27,3 +27,13 @@ export function getAnalisisRunInfo(assessment: Assessment): { label: string; tan
     oleh: assessment.dianalisisOleh ?? FALLBACK_OLEH,
   };
 }
+
+// "Publikasi terakhir" info for the Peserta tab's "Selesai" banner — same
+// fallback as above for assessments never run through
+// AssessmentStore.publishNilai() (the static "Selesai" QA fixtures).
+export function getPublikasiInfo(assessment: Assessment): { tanggal: string; oleh: string } {
+  return {
+    tanggal: assessment.nilaiDipublikasikanPada ?? FALLBACK_TANGGAL,
+    oleh: assessment.nilaiDipublikasikanOleh ?? FALLBACK_OLEH,
+  };
+}

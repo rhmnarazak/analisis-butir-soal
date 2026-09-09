@@ -118,7 +118,12 @@ export function AssessmentStoreProvider({ children }: { children: ReactNode }) {
 
   const publishNilai = useCallback(
     (id: string) => {
-      updateAssessment(id, { status: "Selesai", anbusoState: "Analisis Sekarang" });
+      updateAssessment(id, {
+        status: "Selesai",
+        anbusoState: "Analisis Sekarang",
+        nilaiDipublikasikanPada: formatAnalisisTimestamp(new Date()),
+        nilaiDipublikasikanOleh: "Abdul Razak",
+      });
     },
     [updateAssessment],
   );
