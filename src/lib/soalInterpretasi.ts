@@ -1,4 +1,5 @@
 import { AlertOctagon, AlertTriangle, Ban, CircleCheck, type LucideIcon } from "lucide-react";
+import type { HasilAnalisis } from "./itemAnalysisStats";
 import type { DifficultyLevel, DiscriminationLevel, QuestionAnalysis } from "../types/assessment";
 
 export type InterpretasiSeverity = "success" | "warning" | "error" | "neutral";
@@ -79,3 +80,38 @@ export function buildInterpretasiList(q: QuestionAnalysis): InterpretasiPoint[] 
   const { validitas, kesukaran, dayaPembeda, distraktor } = buildInterpretasi(q);
   return [validitas, kesukaran, dayaPembeda, distraktor];
 }
+
+// Overall soal-level verdict — the "Hasil Analisis" banner text shown on
+// SoalDetailPage and (desc only) the "Hasil Analisis" column of
+// SoalPerluPerhatianPage's table, so both read the exact same wording for a
+// given hasil.
+export const HASIL_BANNER: Record<HasilAnalisis, { border: string; bg: string; icon: string; title: string; desc: string }> = {
+  "Layak Digunakan": {
+    border: "border-success-500",
+    bg: "bg-success-25",
+    icon: "bg-success-500",
+    title: "Soal Layak Digunakan",
+    desc: "Hasil analisis menunjuan karakteristik soal sudah baik dan soal dapat digunakan kembali.",
+  },
+  "Perlu Ditinjau": {
+    border: "border-warning-500",
+    bg: "bg-warning-25",
+    icon: "bg-warning-500",
+    title: "Soal Perlu Ditinjau",
+    desc: "Terdapat indiator yang perlu diperhatikan, tetapi belum cukup kuat untuk menyatakan soal perlu diperbaiki.",
+  },
+  "Perlu Diperbaiki": {
+    border: "border-error-500",
+    bg: "bg-error-25",
+    icon: "bg-error-500",
+    title: "Soal Perlu Diperbaiki",
+    desc: "Terdapat indikator yang menunjukan masalah cukup signifikan sehingga soal perlu ada perbaikan jika ingin digunakan kembali.",
+  },
+  "Tidak Dianalisis": {
+    border: "border-tertiary-500",
+    bg: "bg-tertiary-25",
+    icon: "bg-tertiary-500",
+    title: "Soal Tidak Dianalisis",
+    desc: "Tidak dapat dianalisis untuk jenis soal ini.",
+  },
+};

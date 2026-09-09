@@ -1,11 +1,18 @@
 import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, ListFilter, Search, XCircle } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { HASIL_STYLES, StatusPill } from "../components/detail/AnalisisSoalTable";
 import { JenisPill } from "../components/detail/SoalTab";
 import { getQuestionsForAssessment } from "../data/questionAnalysis";
 import { usePageTitle } from "../hooks/usePageTitle";
-import { getDistraktorPercent, getDistraktorStatus, getHasilAnalisis, HASIL_PRIORITY } from "../lib/itemAnalysisStats";
-import { buildInterpretasi, type InterpretasiPoint } from "../lib/soalInterpretasi";
+import {
+  getDistraktorPercent,
+  getDistraktorStatus,
+  getHasilAnalisis,
+  HASIL_PRIORITY,
+  type HasilAnalisis,
+} from "../lib/itemAnalysisStats";
+import { buildInterpretasi, HASIL_BANNER, type InterpretasiPoint } from "../lib/soalInterpretasi";
 import { useAssessmentStore } from "../state/AssessmentStore";
 import type { QuestionAnalysis } from "../types/assessment";
 
@@ -23,6 +30,16 @@ const TONE_BG: Record<InterpretasiPoint["severity"], string> = {
   warning: "bg-warning-25",
   error: "bg-error-25",
   neutral: "bg-tertiary-25",
+};
+
+// This page only ever lists "Perlu Ditinjau"/"Perlu Diperbaiki" soal, but
+// keyed on the full HasilAnalisis type so it stays correct if that ever
+// changes — same -25 tone as HASIL_BANNER's own bg, just keyed for the cell.
+const HASIL_CELL_BG: Record<HasilAnalisis, string> = {
+  "Layak Digunakan": TONE_BG.success,
+  "Perlu Ditinjau": TONE_BG.warning,
+  "Perlu Diperbaiki": TONE_BG.error,
+  "Tidak Dianalisis": TONE_BG.neutral,
 };
 
 // One metric column's cell: value+label (when the metric was analyzed) plus
@@ -152,10 +169,11 @@ export function SoalPerluPerhatianPage() {
                 <col style={{ minWidth: 260 }} />
                 <col style={{ minWidth: 260 }} />
                 <col style={{ minWidth: 260 }} />
+                <col style={{ minWidth: 260 }} />
               </colgroup>
               <thead>
                 <tr>
-                  {["No", "Soal", "Validitas", "Kesukaran", "Daya Pembeda", "Efektivitas Distraktor"].map((h, i) => (
+                  {["No", "Soal", "Validitas", "Tingkat Kesukaran", "Daya Pembeda", "Efektivitas Distraktor", "Hasil Analisis"].map((h, i) => (
                     <th
                       key={h}
                       className={`whitespace-nowrap border-b border-tertiary-300 bg-tertiary-50 px-4 py-4 text-sm font-bold text-tertiary-900 ${
@@ -168,7 +186,7 @@ export function SoalPerluPerhatianPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map(({ q }) => {
+                {rows.map(({ q, hasil }) => {
                   const interpretasi = buildInterpretasi(q);
                   const distraktorStatus = getDistraktorStatus(q);
                   const distraktorPercent = getDistraktorPercent(q);
@@ -245,6 +263,12 @@ export function SoalPerluPerhatianPage() {
                           )
                         }
                       />
+                      <td className={`min-w-[260px] border-b border-l border-tertiary-300 px-4 py-3 align-top text-sm ${HASIL_CELL_BG[hasil]}`}>
+                        <div className="flex flex-col gap-1.5">
+                          <StatusPill label={hasil} className={HASIL_STYLES[hasil].className} icon={HASIL_STYLES[hasil].icon} />
+                          <p className="text-tertiary-900">{HASIL_BANNER[hasil].desc}</p>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}

@@ -23,6 +23,7 @@ import {
   buildInterpretasiList,
   CHIP_STYLE,
   DAYA_PEMBEDA_INTERPRETASI,
+  HASIL_BANNER,
   KESUKARAN_INTERPRETASI,
   type InterpretasiPoint,
   type InterpretasiSeverity,
@@ -45,37 +46,6 @@ const DAYA_PEMBEDA_BANDS: { className: string; width: number; dividerClassName: 
   { className: "bg-success-500", width: 25, dividerClassName: "bg-success-500", tick: "0,75" },
   { className: "bg-success-700", width: 25, dividerClassName: "bg-success-700" },
 ];
-
-const HASIL_BANNER: Record<HasilAnalisis, { border: string; bg: string; icon: string; title: string; desc: string }> = {
-  "Layak Digunakan": {
-    border: "border-success-500",
-    bg: "bg-success-25",
-    icon: "bg-success-500",
-    title: "Soal Layak Digunakan",
-    desc: "Hasil analisis menunjuan karakteristik soal sudah baik dan soal dapat digunakan kembali.",
-  },
-  "Perlu Ditinjau": {
-    border: "border-warning-500",
-    bg: "bg-warning-25",
-    icon: "bg-warning-500",
-    title: "Soal Perlu Ditinjau",
-    desc: "Terdapat indiator yang perlu diperhatikan, tetapi belum cukup kuat untuk menyatakan soal perlu diperbaiki.",
-  },
-  "Perlu Diperbaiki": {
-    border: "border-error-500",
-    bg: "bg-error-25",
-    icon: "bg-error-500",
-    title: "Soal Perlu Diperbaiki",
-    desc: "Terdapat indikator yang menunjukan masalah cukup signifikan sehingga soal perlu ada perbaikan jika ingin digunakan kembali.",
-  },
-  "Tidak Dianalisis": {
-    border: "border-tertiary-500",
-    bg: "bg-tertiary-25",
-    icon: "bg-tertiary-500",
-    title: "Soal Tidak Dianalisis",
-    desc: "Tidak dapat dianalisis untuk jenis soal ini.",
-  },
-};
 
 const HASIL_ICON: Record<HasilAnalisis, typeof AlertTriangle> = {
   "Layak Digunakan": CircleCheck,
