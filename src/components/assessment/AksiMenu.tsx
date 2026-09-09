@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAssessmentStore } from "../../state/AssessmentStore";
 import type { AnbusoState, Assessment } from "../../types/assessment";
 import { AnbusoStateIcon, isAnbusoActionable } from "./AnbusoActionCell";
+import { needsRepublish } from "./StatusBadge";
 
 const RUNNABLE_STATES: AnbusoState[] = ["Analisis Sekarang", "Perbarui Hasil Analisis"];
 
@@ -116,6 +117,12 @@ export function AksiMenu({ row }: { row: Assessment }) {
                     setOpen(false);
                     if (row.anbusoState === "Lihat Hasil Analisis") {
                       navigate(`/asesmen/${row.id}/analisis-butir-soal`);
+                    } else if (row.anbusoState === "Perbarui Hasil Analisis" && needsRepublish(row)) {
+                      // Nilai haven't been (re)published yet ("Publikasi
+                      // Ulang") — don't silently run AnBuSo here; land on
+                      // the AnBuSo tab where the button surfaces the actual
+                      // "Hasil Analisis Belum Bisa Diperbarui" warning.
+                      navigate(`/asesmen/${row.id}?tab=anbuso`);
                     } else if (RUNNABLE_STATES.includes(row.anbusoState)) {
                       runAnalysis(row.id);
                       navigate(`/asesmen/${row.id}?tab=anbuso`);

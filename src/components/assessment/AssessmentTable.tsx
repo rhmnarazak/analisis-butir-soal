@@ -13,7 +13,7 @@ import { useHorizontalWheelScroll } from "../../hooks/useHorizontalWheelScroll";
 import type { Assessment } from "../../types/assessment";
 import { AksiMenu } from "./AksiMenu";
 import { AnbusoActionCell } from "./AnbusoActionCell";
-import { MetodeBadge, StatusBadge } from "./StatusBadge";
+import { MetodeBadge, needsRepublish, StatusBadge } from "./StatusBadge";
 
 interface Column {
   header: string;
@@ -97,7 +97,9 @@ function buildColumns({
     {
       header: "Analisis Butir Soal",
       width: 212,
-      render: (row) => <AnbusoActionCell state={row.anbusoState} assessmentId={row.id} />,
+      render: (row) => (
+        <AnbusoActionCell state={row.anbusoState} assessmentId={row.id} blocked={needsRepublish(row)} />
+      ),
     },
     {
       header: "Aksi",

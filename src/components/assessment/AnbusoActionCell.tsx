@@ -22,7 +22,20 @@ export function AnbusoStateIcon({ state, size = 16, className }: { state: Anbuso
   return <Sparkles size={size} className={className} />;
 }
 
-export function AnbusoActionCell({ state, assessmentId }: { state: AnbusoState; assessmentId: string }) {
+export function AnbusoActionCell({
+  state,
+  assessmentId,
+  // True when the assessment is "Publikasi Ulang" — its nilai haven't been
+  // (re)published yet, so re-running AnBuSo now would just analyze against
+  // nilai about to change again. Instead of silently running here, this
+  // just navigates to the AnBuSo tab, where clicking the button surfaces
+  // the actual "Hasil Analisis Belum Bisa Diperbarui" warning (AnbusoGate).
+  blocked = false,
+}: {
+  state: AnbusoState;
+  assessmentId: string;
+  blocked?: boolean;
+}) {
   const navigate = useNavigate();
   const { isAnalysisPending, runAnalysis } = useAssessmentStore();
   const pending = isAnalysisPending(assessmentId);
@@ -52,6 +65,8 @@ export function AnbusoActionCell({ state, assessmentId }: { state: AnbusoState; 
         event.stopPropagation();
         if (state === "Lihat Hasil Analisis") {
           navigate(`/asesmen/${assessmentId}/analisis-butir-soal`);
+        } else if (state === "Perbarui Hasil Analisis" && blocked) {
+          navigate(`/asesmen/${assessmentId}?tab=anbuso`);
         } else if (RUNNABLE_STATES.includes(state)) {
           runAnalysis(assessmentId);
           navigate(`/asesmen/${assessmentId}?tab=anbuso`);

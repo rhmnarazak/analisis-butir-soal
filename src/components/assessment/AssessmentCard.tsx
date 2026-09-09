@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Assessment } from "../../types/assessment";
 import { AnbusoActionCell } from "./AnbusoActionCell";
-import { MetodeBadge, StatusBadge } from "./StatusBadge";
+import { MetodeBadge, needsRepublish, StatusBadge } from "./StatusBadge";
 
 function Divider() {
   return <div className="h-px w-full bg-tertiary-300" />;
@@ -82,7 +82,7 @@ export function AssessmentCard({ row, index }: { row: Assessment; index: number 
 
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs text-tertiary-600">Analisis Butir Soal :</span>
-        <AnbusoActionCell state={row.anbusoState} assessmentId={row.id} />
+        <AnbusoActionCell state={row.anbusoState} assessmentId={row.id} blocked={needsRepublish(row)} />
       </div>
     </div>
   );

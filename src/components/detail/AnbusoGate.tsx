@@ -1,11 +1,13 @@
 import { CalendarDays, CircleCheck, CircleX, Loader2, Sparkles, User } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { needsRepublish } from "../assessment/StatusBadge";
 import { getAnalisisRunInfo } from "../../lib/analisisInfo";
 import { getAnalisisTier, MIN_PESERTA_ANALYSIS } from "../../lib/itemAnalysisStats";
 import { parsePesertaDinilai } from "../../lib/participantStatus";
 import { countAnalyzableSoal } from "../../lib/soalAnalysis";
 import type { AnbusoState, Assessment, Participant, QuestionAnalysis } from "../../types/assessment";
+import { AnalisisBelumBisaDiperbaruiDialog } from "./AnalisisBelumBisaDiperbaruiDialog";
 
 type ColorKey = "warning" | "information" | "success" | "error";
 
@@ -156,6 +158,7 @@ export function AnbusoGate({
   onRunAnalysis?: () => void;
 }) {
   const navigate = useNavigate();
+  const [showBlockedDialog, setShowBlockedDialog] = useState(false);
   // The mock roster tops out at 30 real participants, but "Jumlah Peserta"
   // has to reflect the assessment's actual peserta count (some test cases
   // go up to 100+) — so this reads the assessment field, not the roster
@@ -167,6 +170,11 @@ export function AnbusoGate({
   const canViewResults = assessment.anbusoState === "Lihat Hasil Analisis";
   const canRunAnalysis =
     assessment.anbusoState === "Analisis Sekarang" || assessment.anbusoState === "Perbarui Hasil Analisis";
+  // "Perbarui Hasil Analisis" is stale specifically because of nilai that
+  // haven't been (re)published yet ("Publikasi Ulang") — re-running AnBuSo
+  // now would just analyze against nilai about to be superseded again, so
+  // that click is intercepted with a warning instead of actually running.
+  const blockedByUnpublishedNilai = assessment.anbusoState === "Perbarui Hasil Analisis" && needsRepublish(assessment);
   const runInfo = getAnalisisRunInfo(assessment);
 
   const soalDapatDianalisis = config.soalDapatDianalisisOverride ?? countAnalyzableSoal(questions);
@@ -230,9 +238,11 @@ export function AnbusoGate({
                 onClick={
                   canViewResults
                     ? () => navigate(`/asesmen/${assessment.id}/analisis-butir-soal`)
-                    : canRunAnalysis && config.button.enabled
-                      ? onRunAnalysis
-                      : undefined
+                    : blockedByUnpublishedNilai
+                      ? () => setShowBlockedDialog(true)
+                      : canRunAnalysis && config.button.enabled
+                        ? onRunAnalysis
+                        : undefined
                 }
                 className={`flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-5 text-sm font-semibold transition-colors ${
                   !config.button.enabled
@@ -268,6 +278,7 @@ export function AnbusoGate({
         </div>
       </div>
 
+      <AnalisisBelumBisaDiperbaruiDialog open={showBlockedDialog} onClose={() => setShowBlockedDialog(false)} />
     </div>
   );
 }
