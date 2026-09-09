@@ -196,7 +196,7 @@ export function SoalPerluPerhatianPage() {
                         {q.no}
                       </td>
                       <td className="border-b border-tertiary-300 bg-white px-3 py-3 align-top break-words transition-colors group-hover:bg-tertiary-100">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col items-start gap-1">
                           <JenisPill jenis={q.jenis} />
                           <span className="line-clamp-3 text-sm text-tertiary-900">{q.cuplikanSoal}</span>
                         </div>
@@ -264,7 +264,7 @@ export function SoalPerluPerhatianPage() {
                         }
                       />
                       <td className={`border-b border-l border-tertiary-300 px-3 py-3 align-top text-sm break-words ${HASIL_CELL_BG[hasil]}`}>
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col items-start gap-1.5">
                           <StatusPill label={hasil} className={HASIL_STYLES[hasil].className} icon={HASIL_STYLES[hasil].icon} />
                           <p className="text-tertiary-900">{HASIL_BANNER[hasil].desc}</p>
                         </div>
