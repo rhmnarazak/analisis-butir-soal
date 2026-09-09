@@ -119,10 +119,10 @@ export function AksiMenu({ row }: { row: Assessment }) {
                       navigate(`/asesmen/${row.id}/analisis-butir-soal`);
                     } else if (row.anbusoState === "Perbarui Hasil Analisis" && needsRepublish(row)) {
                       // Nilai haven't been (re)published yet ("Publikasi
-                      // Ulang") — don't silently run AnBuSo here; land on
-                      // the AnBuSo tab where the button surfaces the actual
-                      // "Hasil Analisis Belum Bisa Diperbarui" warning.
-                      navigate(`/asesmen/${row.id}?tab=anbuso`);
+                      // Ulang") — don't silently run AnBuSo here. ?blocked=1
+                      // makes the AnBuSo tab show the warning popup right
+                      // away instead of requiring a second click there.
+                      navigate(`/asesmen/${row.id}?tab=anbuso&blocked=1`);
                     } else if (RUNNABLE_STATES.includes(row.anbusoState)) {
                       runAnalysis(row.id);
                       navigate(`/asesmen/${row.id}?tab=anbuso`);

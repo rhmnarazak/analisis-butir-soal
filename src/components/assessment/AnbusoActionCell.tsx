@@ -66,7 +66,9 @@ export function AnbusoActionCell({
         if (state === "Lihat Hasil Analisis") {
           navigate(`/asesmen/${assessmentId}/analisis-butir-soal`);
         } else if (state === "Perbarui Hasil Analisis" && blocked) {
-          navigate(`/asesmen/${assessmentId}?tab=anbuso`);
+          // ?blocked=1 makes the AnBuSo tab show the warning popup right
+          // away, instead of requiring a second click on this page's button.
+          navigate(`/asesmen/${assessmentId}?tab=anbuso&blocked=1`);
         } else if (RUNNABLE_STATES.includes(state)) {
           runAnalysis(assessmentId);
           navigate(`/asesmen/${assessmentId}?tab=anbuso`);

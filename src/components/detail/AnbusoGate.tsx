@@ -1,6 +1,6 @@
 import { CalendarDays, CircleCheck, CircleX, Loader2, Sparkles, User } from "lucide-react";
-import { useState, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, type ReactNode } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { needsRepublish } from "../assessment/StatusBadge";
 import { getAnalisisRunInfo } from "../../lib/analisisInfo";
 import { getAnalisisTier, MIN_PESERTA_ANALYSIS } from "../../lib/itemAnalysisStats";
@@ -158,6 +158,7 @@ export function AnbusoGate({
   onRunAnalysis?: () => void;
 }) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showBlockedDialog, setShowBlockedDialog] = useState(false);
   // The mock roster tops out at 30 real participants, but "Jumlah Peserta"
   // has to reflect the assessment's actual peserta count (some test cases
@@ -176,6 +177,21 @@ export function AnbusoGate({
   // that click is intercepted with a warning instead of actually running.
   const blockedByUnpublishedNilai = assessment.anbusoState === "Perbarui Hasil Analisis" && needsRepublish(assessment);
   const runInfo = getAnalisisRunInfo(assessment);
+
+  // Clicking "Perbarui Hasil Analisis" from the assessment table/card while
+  // blocked navigates straight here with ?blocked=1, so the warning shows
+  // immediately instead of requiring a second click on this page's own
+  // button. The param is stripped right after so back/refresh don't re-open it.
+  useEffect(() => {
+    if (searchParams.get("blocked") === "1") {
+      if (blockedByUnpublishedNilai) setShowBlockedDialog(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete("blocked");
+      setSearchParams(next, { replace: true });
+    }
+    // Intentionally mount-only: this reacts to the URL the page was opened
+    // with, not to every re-render of blockedByUnpublishedNilai/searchParams.
+  }, []);
 
   const soalDapatDianalisis = config.soalDapatDianalisisOverride ?? countAnalyzableSoal(questions);
   const { dinilai, total } = parsePesertaDinilai(assessment.pesertaDinilai);
